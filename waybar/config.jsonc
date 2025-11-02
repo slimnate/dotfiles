@@ -68,14 +68,13 @@
     "max-length": 50,
     "separate-outputs": true
   },
-
   "cpu": {
     "interval": 5,
-    "format": "󰍛 CPU: {usage}%",
+    "format": "💻 CPU: {usage}%",
     "on-click": "$TERMINAL -e btop"
   },
   "clock": {
-    "format": "| {:L%A %H:%M}",
+    "format": "| 🕒 {:L%A %H:%M}",
     "format-alt": "{:L%d %B W%V %Y}",
     "tooltip": false,
     "on-click-right": "omarchy-launch-floating-terminal-with-presentation omarchy-tz-select"
@@ -112,7 +111,7 @@
   },
   "disk": {
     "interval": 30,
-    "format": "󰋊 {percentage_used}%",
+    "format": "💾 {percentage_used}%",
     "format-alt": "󰋊 {free}",
     "path": "/",
     "tooltip-format": "{used} / {total} used"
