@@ -1,0 +1,139 @@
+#!/bin/bash
+# Save as: ~/.local/share/omarchy/bin/omarchy-launch-cursor-project
+# Make executable: chmod +x ~/.local/share/omarchy/bin/omarchy-launch-cursor-project
+
+set -euo pipefail
+
+BASE_DIR="$HOME/Documents/dev"
+
+# Ensure base dir exists and has directories
+if [[ ! -d "$BASE_DIR" ]]; then
+  notify-send "Projects" "Folder not found: $BASE_DIR"
+  exit 1
+fi
+
+# List immediate subdirectories (names only)
+list_projects() {
+  find -L "$BASE_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'
+}
+
+# Find the most recent modification time (epoch) within a project directory
+latest_mtime() {
+  local path="$1"
+  # Ignore heavy/vendor dirs for speed
+  local ts
+  ts="$(find -L "$path" \
+      -path "$path/.git" -prune -o \
+      -path "$path/node_modules" -prune -o \
+      -type f -printf '%T@\n' 2>/dev/null | sort -nr | head -1)"
+  if [[ -z "${ts:-}" ]]; then
+    stat -c %Y "$path" 2>/dev/null || echo 0
+  else
+    printf '%.0f\n' "$ts"
+  fi
+}
+
+# Convert epoch seconds to a compact relative string (e.g. 3h ago)
+humanize_epoch() {
+  local t="$1"
+  local now diff
+  now="$(date +%s)"
+  diff=$(( now - t ))
+  if (( diff < 60 )); then
+    echo "${diff}s ago"
+  elif (( diff < 3600 )); then
+    echo "$(( diff / 60 ))m ago"
+  elif (( diff < 86400 )); then
+    echo "$(( diff / 3600 ))h ago"
+  else
+    echo "$(( diff / 86400 ))d ago"
+  fi
+}
+
+# Emit a single tab-separated row for a project with a numeric timestamp for sorting
+project_row() {
+  local name="$1"
+  local path="$BASE_DIR/$1"
+
+  local ts human last_author branch dirty ahead behind tags
+  tags=""
+
+  # Tech stack tags
+  [[ -f "$path/package.json" ]] && tags+="node "
+  [[ -f "$path/pnpm-lock.yaml" ]] && tags+="pnpm "
+  [[ -f "$path/yarn.lock" ]] && tags+="yarn "
+  [[ -f "$path/bun.lockb" ]] && tags+="bun "
+  [[ -f "$path/go.mod" ]] && tags+="go "
+  [[ -f "$path/pyproject.toml" || -f "$path/requirements.txt" ]] && tags+="python "
+  [[ -f "$path/Cargo.toml" ]] && tags+="rust "
+  [[ -f "$path/composer.json" ]] && tags+="php "
+  [[ -f "$path/.tool-versions" || -f "$path/.mise.toml" ]] && tags+="mise "
+  [[ -d "$path/.devcontainer" ]] && tags+="devcontainer "
+  [[ -f "$path/Dockerfile" || -f "$path/docker-compose.yml" ]] && tags+="docker "
+  [[ -d "$path/tests" || -d "$path/test" ]] && tags+="tests "
+  tags="${tags%% }"
+
+  # Always sort by latest file modification time in the project
+  ts="$(latest_mtime "$path")"
+  human="$(humanize_epoch "$ts")"
+  last_author="-"
+
+  if git -C "$path" rev-parse --git-dir >/dev/null 2>&1; then
+    # Branch (handle detached HEAD)
+    branch="$(git -C "$path" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '-')"
+
+    # Dirty files count
+    dirty="$(git -C "$path" status --porcelain 2>/dev/null | wc -l | awk '{print $1}')"
+
+    # Ahead/behind relative to upstream if configured
+    if git -C "$path" rev-parse --abbrev-ref --symbolic-full-name @{u} >/dev/null 2>&1; then
+      read -r ahead behind < <(git -C "$path" rev-list --left-right --count HEAD...@{u} 2>/dev/null | awk '{print $1, $2}')
+    else
+      ahead="0"; behind="0"
+    fi
+  else
+    # Non-git projects: placeholders
+    branch="-"
+    dirty="0"
+    ahead="0"
+    behind="0"
+  fi
+
+  # Compose a compact status field
+  local status
+  status="${branch} • ${dirty}Δ • ${ahead}↑ ${behind}↓"
+
+  # Compose subtext for last activity (based on file mtime only)
+  local activity
+  activity="$human"
+
+  # Output: ts (for sort) \t name \t status \t activity \t tags
+  printf "%s\t%s\t%s\t%s\t%s\n" "$ts" "$name" "$status" "$activity" "$tags"
+}
+
+# Build dmenu items: label (pretty) and value (absolute path), select by value
+selection="$(
+  list_projects \
+    | while read -r p; do project_row "$p"; done \
+    | sort -rn -k1,1 \
+    | awk -F '\t' -v base="$BASE_DIR" -v NAME_COL=50 'BEGIN{OFS="\t"} { \
+        name = $2; \
+        info = $3; \
+        if ($4 != "-") info = info " — " $4; \
+        if ($5 != "") info = info " — " $5; \
+        pad_len = NAME_COL - length(name); if (pad_len < 1) pad_len = 1; \
+        pad = sprintf("%" pad_len "s", ""); \
+        label = name pad info; \
+        value = base "/" $2; \
+        print label, value \
+      }' \
+    | walker --dmenu -t $'\t' -l 1 -V 2 --theme dmenu_250 -p 'Open in Cursor…' -w 1100 || true
+)"
+
+# Walker returns nothing on cancel; handle gracefully
+if [[ -z "${selection:-}" || "$selection" == "CNCLD" ]]; then
+  exit 0
+fi
+
+# selection is the absolute path (value column)
+exec uwsm app -- cursor "$selection"
