@@ -4,17 +4,97 @@
 
 set -euo pipefail
 
-BASE_DIR="$HOME/Documents/dev"
+# Configure where to look for projects
+# - BASE_DIRS: directories whose immediate subfolders are considered projects
+# - PROJECTS: individual project directories to include explicitly
+#   To override a project's display name, use the format:
+#   "My Label|/absolute/path/to/project". Without a label, the basename is used.
+BASE_DIRS=(
+  "$HOME/Documents/dev"
+)
+PROJECTS=(
+  "Custom Dotfiles|$HOME/.dotfiles"
+  "Omarchy local config|$HOME/.local/share/omarchy"
+)
 
-# Ensure base dir exists and has directories
-if [[ ! -d "$BASE_DIR" ]]; then
-  notify-send "Projects" "Folder not found: $BASE_DIR"
+# Debug logging (export CURSOR_DEV_DEBUG=1 to enable)
+DEBUG="${CURSOR_DEV_DEBUG:-0}"
+LOG_FILE="${CURSOR_DEV_LOG:-/tmp/cursor-dev-launcher.log}"
+# Menu width for dmenu mode (walker 2.x ignores -w; use wrapper width)
+CURSOR_MENU_WIDTH="${CURSOR_MENU_WIDTH:-1100}"
+# Fixed menu height (set both min/max to this value)
+CURSOR_MENU_HEIGHT="${CURSOR_MENU_HEIGHT:-600}"
+# Menu formatting and info toggles
+MENU_COLS="${CURSOR_MENU_COLS:-96}"
+# Max visible branch name length (characters); longer branches are truncated with …
+BRANCH_MAX="${CURSOR_BRANCH_MAX:-24}"
+# Toggle which info segments to show (0/1)
+SHOW_STATUS="${CURSOR_SHOW_STATUS:-1}"
+SHOW_ACTIVITY="${CURSOR_SHOW_ACTIVITY:-1}"
+SHOW_TAGS="${CURSOR_SHOW_TAGS:-0}"
+
+log() {
+  if [[ "$DEBUG" == 1 ]]; then
+    printf '%s %s\n' "$(date '+%F %T')" "$*" >> "$LOG_FILE"
+  fi
+}
+
+# Ensure at least one source exists; continue even if some are missing
+has_source=false
+for d in "${BASE_DIRS[@]}"; do
+  if [[ -d "$d" ]]; then has_source=true; break; fi
+done
+if [[ ${#PROJECTS[@]} -gt 0 ]]; then has_source=true; fi
+if [[ "$has_source" == false ]]; then
+  notify-send "Projects" "No sources found. Check BASE_DIRS/PROJECTS in the launcher script."
   exit 1
 fi
 
-# List immediate subdirectories (names only)
+# Parse PROJECTS into absolute paths and a label map for custom display names
+declare -A PROJECT_LABEL_FOR_PATH
+INDIVIDUAL_PROJECT_PATHS=()
+parse_projects() {
+  PROJECT_LABEL_FOR_PATH=()
+  INDIVIDUAL_PROJECT_PATHS=()
+  local entry label path
+  for entry in "${PROJECTS[@]}"; do
+    [[ -n "${entry:-}" ]] || continue
+    if [[ "$entry" == *"|"* ]]; then
+      label="${entry%%|*}"
+      path="${entry#*|}"
+    else
+      label=""
+      path="$entry"
+    fi
+    [[ -d "$path" ]] || continue
+    INDIVIDUAL_PROJECT_PATHS+=("$path")
+    if [[ -n "$label" ]]; then
+      PROJECT_LABEL_FOR_PATH["$path"]="$label"
+    fi
+  done
+}
+
+# Resolve a display name for a project path; fallback to provided default
+get_display_name() {
+  local path="$1"; local fallback="$2"
+  if [[ -n "${PROJECT_LABEL_FOR_PATH[$path]+x}" ]]; then
+    printf "%s\n" "${PROJECT_LABEL_FOR_PATH[$path]}"
+  else
+    printf "%s\n" "$fallback"
+  fi
+}
+
+# List absolute project directories from BASE_DIRS (immediate children) and PROJECTS
 list_projects() {
-  find -L "$BASE_DIR" -mindepth 1 -maxdepth 1 -type d -printf '%f\n'
+  {
+    for d in "${BASE_DIRS[@]}"; do
+      [[ -d "$d" ]] || continue
+      find -L "$d" -mindepth 1 -maxdepth 1 -type d -print
+    done
+    for p in "${INDIVIDUAL_PROJECT_PATHS[@]}"; do
+      printf '%s\n' "$p"
+    done
+  } | sort -u
 }
 
 # Find the most recent modification time (epoch) within a project directory
@@ -50,10 +130,18 @@ humanize_epoch() {
   fi
 }
 
+# Ensure a value is a single line without tabs/newlines
+one_line() {
+  printf '%s' "$1" | tr '\r\n\t' '   '
+}
+
 # Emit a single tab-separated row for a project with a numeric timestamp for sorting
 project_row() {
-  local name="$1"
-  local path="$BASE_DIR/$1"
+  local path="$1"
+  local name
+  name="$(basename -- "$path")"
+  name="$(one_line "$name")"
+  name="$(get_display_name "$path" "$name")"
 
   local ts human last_author branch dirty ahead behind tags
   tags=""
@@ -81,6 +169,13 @@ project_row() {
   if git -C "$path" rev-parse --git-dir >/dev/null 2>&1; then
     # Branch (handle detached HEAD)
     branch="$(git -C "$path" rev-parse --abbrev-ref HEAD 2>/dev/null || echo '-')"
+    branch="$(one_line "$branch")"
+    # Truncate branch to BRANCH_MAX characters if needed
+    if [[ -n "$branch" && "$branch" != "-" ]]; then
+      if (( ${#branch} > BRANCH_MAX )); then
+        branch="${branch:0:$((BRANCH_MAX-1))}…"
+      fi
+    fi
 
     # Dirty files count
     dirty="$(git -C "$path" status --porcelain 2>/dev/null | wc -l | awk '{print $1}')"
@@ -102,32 +197,57 @@ project_row() {
   # Compose a compact status field
   local status
   status="${branch} • ${dirty}Δ • ${ahead}↑ ${behind}↓"
+  status="$(one_line "$status")"
 
   # Compose subtext for last activity (based on file mtime only)
   local activity
   activity="$human"
+  activity="$(one_line "$activity")"
 
-  # Output: ts (for sort) \t name \t status \t activity \t tags
-  printf "%s\t%s\t%s\t%s\t%s\n" "$ts" "$name" "$status" "$activity" "$tags"
+  # Output: ts (for sort) \t name \t status \t activity \t tags \t abs_path
+  # Sanitize tags and path as one-line too
+  tags="$(one_line "$tags")"
+  path="$(one_line "$path")"
+  printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$ts" "$name" "$status" "$activity" "$tags" "$path"
 }
 
 # Build dmenu items: label (pretty) and value (absolute path), select by value
+parse_projects
+raw_rows_file="$(mktemp /tmp/cursor-dev-raw.XXXX.tsv)"
+menu_feed_file="$(mktemp /tmp/cursor-dev-feed.XXXX.tsv)"
+cleanup() { [[ "$DEBUG" == 1 ]] || rm -f "$raw_rows_file" "$menu_feed_file"; }
+trap cleanup EXIT
+
+log "Scanning sources: BASE_DIRS=(${BASE_DIRS[*]}) PROJECTS=(${PROJECTS[*]})"
+
 selection="$(
   list_projects \
-    | while read -r p; do project_row "$p"; done \
-    | sort -rn -k1,1 \
-    | awk -F '\t' -v base="$BASE_DIR" -v NAME_COL=50 'BEGIN{OFS="\t"} { \
+    | while read -r path; do project_row "$path"; done \
+    | sort -rn -k1,1 | tee "$raw_rows_file" \
+    | awk -F '\t' -v TOTAL_COLS="${MENU_COLS}" -v SHOW_STATUS="${SHOW_STATUS}" -v SHOW_ACTIVITY="${SHOW_ACTIVITY}" -v SHOW_TAGS="${SHOW_TAGS}" 'BEGIN{OFS="\t"} { \
+        # Require both label source and value (abs path)
+        if ($2 == "" || $6 == "") next; \
         name = $2; \
-        info = $3; \
-        if ($4 != "-") info = info " — " $4; \
-        if ($5 != "") info = info " — " $5; \
-        pad_len = NAME_COL - length(name); if (pad_len < 1) pad_len = 1; \
+        info = ""; \
+        if (SHOW_STATUS == 1) info = $3; \
+        if (SHOW_ACTIVITY == 1 && $4 != "-") { if (info != "") info = info " — "; info = info $4; } \
+        if (SHOW_TAGS == 1 && $5 != "") { if (info != "") info = info " — "; info = info $5; } \
+        # Right-justify info to TOTAL_COLS by shrinking name and adding left padding before info
+        allowed = TOTAL_COLS - length(info) - 1; \
+        if (allowed < 2) { name = "…"; allowed = 1; } \
+        else if (length(name) > allowed) name = substr(name, 1, allowed-1) "…"; \
+        pad_len = TOTAL_COLS - length(info) - length(name); if (pad_len < 1) pad_len = 1; \
         pad = sprintf("%" pad_len "s", ""); \
         label = name pad info; \
-        value = base "/" $2; \
+        value = $6; \
         print label, value \
-      }' \
-    | walker --dmenu -t $'\t' -l 1 -V 2 --theme dmenu_250 -p 'Open in Cursor…' -w 1100 || true
+      }' | tee "$menu_feed_file" \
+    | { \
+        cmd="walker"; \
+        if command -v omarchy-launch-walker >/dev/null 2>&1; then cmd="omarchy-launch-walker"; fi; \
+        "$cmd" --dmenu --width "$CURSOR_MENU_WIDTH" --minheight "$CURSOR_MENU_HEIGHT" --maxheight "$CURSOR_MENU_HEIGHT" -p 'Open in Cursor…'; \
+      } || true
+
 )"
 
 # Walker returns nothing on cancel; handle gracefully
@@ -135,5 +255,21 @@ if [[ -z "${selection:-}" || "$selection" == "CNCLD" ]]; then
   exit 0
 fi
 
-# selection is the absolute path (value column)
-exec uwsm app -- cursor "$selection"
+# In Walker 2.x dmenu, the full row is returned. Extract path from 2nd TSV field.
+selection_path="$(printf "%s" "$selection" | awk -F '\t' '{print $2}')"
+if [[ -z "${selection_path:-}" ]]; then
+  # Fallback: if only one field came back, assume it is the path
+  selection_path="$selection"
+fi
+log "Selected value: $selection_path"
+if [[ "$DEBUG" == 1 ]]; then
+  log "Raw rows saved: $raw_rows_file (lines=$(wc -l < "$raw_rows_file"))"
+  log "Menu feed saved: $menu_feed_file (lines=$(wc -l < "$menu_feed_file"))"
+  # Verify that the selected path exists in the menu feed's second column
+  if ! awk -F '\t' -v sel="$selection" '$2==sel {found=1} END{exit found?0:1}' "$menu_feed_file"; then
+    log "WARNING: Selected value not found in menu feed second column"
+  fi
+fi
+
+# selection_path is the absolute path (value column)
+exec uwsm app -- cursor "$selection_path"
