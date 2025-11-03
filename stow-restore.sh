@@ -28,3 +28,7 @@ stow -v -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
 stow -v -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
 stow -v -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
 stow --dotfiles -v -d $DOTFILES_DIR -t ~ bashrc
+
+# Install microsoft-edge-stable-bin from AUR and configure as default browser
+sudo pacman -S microsoft-edge-stable-bin
+xdg-settings set default-web-browser microsoft-edge-stable-bin.desktop
