@@ -5,37 +5,71 @@
 
 DOTFILES_DIR=~/.dotfiles
 CONFIG_DIR=~/.config
-BACKUP_DIR=$CONFIG_DIR/.config_backup
+BACKUP_DIR=$HOME/.config_backup
+
+# Flags (defaults)
+VERBOSE=0
+DRY_RUN=0
+
+usage() {
+  cat <<EOF
+Usage: $(basename "$0") [options]
+
+Options:
+  -h        Show this help and exit
+  -v        Verbose output
+  -n        Dry run (print commands instead of executing)
+EOF
+  exit "${1:-0}"
+}
+
+# Parse short options
+while getopts ":hvn" opt; do
+  case "$opt" in
+    h) usage 0 ;;
+    v) VERBOSE=1 ;;
+    n) DRY_RUN=1 ;;
+    \?) echo "Unknown option: -$OPTARG" >&2; usage 2 ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+# Helpers
+run() { if [ "$DRY_RUN" -eq 1 ]; then echo "+ $*"; else "$@"; fi; }
+log() { [ "$VERBOSE" -eq 1 ] && echo "$*"; }
+
+STOW_N=$([ "$DRY_RUN" -eq 1 ] && echo "-n")
+STOW_V=$([ "$VERBOSE" -eq 1 ] && echo "-v")
 
 # Create the backup directory if it doesn't exist
 mkdir -p $BACKUP_DIR
 
 # Backup the existing configuration files
-mv $CONFIG_DIR/alacritty $BACKUP_DIR/alacritty.backup
-mv $CONFIG_DIR/bash $BACKUP_DIR/bash.backup
-mv $CONFIG_DIR/hypr $BACKUP_DIR/hypr.backup
-mv $CONFIG_DIR/waybar $BACKUP_DIR/waybar.backup
-mv $HOME/.bashrc $BACKUP_DIR/bashrc.backup
+run mv $CONFIG_DIR/alacritty $BACKUP_DIR/alacritty
+run mv $CONFIG_DIR/bash $BACKUP_DIR/bash
+run mv $CONFIG_DIR/hypr $BACKUP_DIR/hypr
+run mv $CONFIG_DIR/waybar $BACKUP_DIR/waybar
+run mv $HOME/.bashrc $BACKUP_DIR/.bashrc
 
 # Create the configuration file directories if they don't exist
-mkdir -p $CONFIG_DIR/alacritty
-mkdir -p $CONFIG_DIR/bash
-mkdir -p $CONFIG_DIR/hypr
-mkdir -p $CONFIG_DIR/waybar
+run mkdir -p $CONFIG_DIR/alacritty
+run mkdir -p $CONFIG_DIR/bash
+run mkdir -p $CONFIG_DIR/hypr
+run mkdir -p $CONFIG_DIR/waybar
 
 # Undo linking all of the dotfiles before restoring them
-stow --D -v -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
-stow --D -v -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
-stow --D -v -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
-stow --D -v -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
-stow --D -v -d $DOTFILES_DIR -t ~ bashrc
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $HOME bashrc
 
 # Restore the configuration files from the dotfiles repository
-stow -v -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
-stow -v -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
-stow -v -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
-stow -v -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
-stow --dotfiles -v -d $DOTFILES_DIR -t ~ bashrc
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
+stow --dotfiles $STOW_V $STOW_N -d $DOTFILES_DIR -t ~ bashrc
 
 # Install microsoft-edge-stable-bin from AUR and configure as default browser
 # Commented out becuase pacman does not have edge. Prob have to use yay instead.
