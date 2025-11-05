@@ -1,6 +1,8 @@
 #!/bin/bash
 # Save as: ~/.local/share/omarchy/bin/omarchy-launch-cursor-project
 # Make executable: chmod +x ~/.local/share/omarchy/bin/omarchy-launch-cursor-project
+# considering switching to rofi instead of walker: https://github.com/davatorium/rofi/blob/next/doc/rofi-script.5.markdown
+# also considering making this editor agnostic, so that it can be used with other code editors like vscode, sublime text, etc.
 
 set -euo pipefail
 
