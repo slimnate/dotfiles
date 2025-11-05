@@ -10,3 +10,5 @@ source ~/.local/share/omarchy/default/bash/rc
 . "$HOME/.local/share/../bin/env"
 
 source "$HOME/.config/bash/ssh-agent.sh"
+
+eval "$(starship init bash)"
