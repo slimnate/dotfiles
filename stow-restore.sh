@@ -71,7 +71,7 @@ stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
-stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship --ignore=themes/*
 stow --dotfiles $STOW_V $STOW_N -d $DOTFILES_DIR -t ~ bashrc
 
 #Install starship prompt
