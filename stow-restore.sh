@@ -74,14 +74,4 @@ stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship --ignore=themes/*
 stow --dotfiles $STOW_V $STOW_N -d $DOTFILES_DIR -t ~ bashrc
 
-#Install starship prompt
-if [ "$DRY_RUN" -eq 0 ]; then
-    run curl -sS https://starship.rs/install.sh | sh
-fi
-
 log "Dotfiles restored successfully"
-
-# Install microsoft-edge-stable-bin from AUR and configure as default browser
-# Commented out becuase pacman does not have edge. Prob have to use yay instead.
-# sudo pacman -S microsoft-edge-stable-bin
-# xdg-settings set default-web-browser microsoft-edge-stable-bin.desktop
