@@ -8,3 +8,6 @@ sudo yay -S joplin-desktop
 
 #Install starship prompt
 sudo pacman -S starship
+
+# Install asciiquarium
+sudo pacman -S asciiquarium
