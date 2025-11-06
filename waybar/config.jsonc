@@ -70,12 +70,11 @@
   },
   "cpu": {
     "interval": 5,
-    "format": "💻 CPU: {usage}%",
+    "format": "\uf4bc {usage}%",
     "on-click": "$TERMINAL -e btop"
   },
   "clock": {
-    "format": "| 🕒 {:L%A %H:%M}",
-    "format-alt": "{:L%d %B W%V %Y}",
+    "format": "\udb80\udcf0 {:L%A %H:%M}",
     "tooltip": false,
     "on-click-right": "omarchy-launch-floating-terminal-with-presentation omarchy-tz-select"
   },
@@ -94,25 +93,21 @@
   },
   "memory": {
     "interval": 5,
-    "format": "{icon} RAM: {used:0.1f}G/{total:0.1f}G",
-    "format-alt": "{icon} RAM: {percentage}%",
-    "format-icons": ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "▇", "█", "█"],
+    "format": "\uefc5  {used:1.0f}/{total:1.0f}GB",
     "tooltip-format": "RAM: {used:0.1f}G / {total:0.1f}G\nSwap: {swapUsed:0.1f}G / {swapTotal:0.1f}G",
     "on-click": "$TERMINAL -e btop"
   },
   "temperature": {
-    "thermal-zone": 2,
+    "hwmon-path": "/sys/class/hwmon/hwmon4/temp1_input",
     "interval": 5,
     "warning-threshold": 75,
     "critical-threshold": 85,
-    "format-icons": ["", "", "", "", ""],
-    "format": "{icon} {temperatureC}°C",
+    "format": "\uef2b {temperatureC}°C",
     "format-critical": "{icon} {temperatureC}°C"
   },
   "disk": {
     "interval": 30,
-    "format": "💾 {percentage_used}%",
-    "format-alt": "󰋊 {free}",
+    "format": "\udb80\udeca {percentage_used}%",
     "path": "/",
     "tooltip-format": "{used} / {total} used"
   },
