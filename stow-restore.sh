@@ -41,8 +41,9 @@ log() { [ "$VERBOSE" -eq 1 ] && echo "$*"; }
 STOW_N=$([ "$DRY_RUN" -eq 1 ] && echo "-n")
 STOW_V=$([ "$VERBOSE" -eq 1 ] && echo "-v")
 
-# Create the backup directory if it doesn't exist
-mkdir -p $BACKUP_DIR
+# Clear and recreate the backup directory if it doesn't exist
+run rm -rf $BACKUP_DIR
+run mkdir -p $BACKUP_DIR
 
 # Backup the existing configuration files
 run mv $CONFIG_DIR/alacritty $BACKUP_DIR/alacritty
@@ -59,6 +60,7 @@ run mkdir -p $CONFIG_DIR/hypr
 run mkdir -p $CONFIG_DIR/waybar
 
 # Undo linking all of the dotfiles before restoring them
+log "Undoing linking all of the dotfiles before restoring them"
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
@@ -67,11 +69,18 @@ stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $HOME bashrc
 
 # Restore the configuration files from the dotfiles repository
+log "Restoring the configuration files from the dotfiles repository"
+log "Restoring alacritty"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
+log "Restoring bash"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
+log "Restoring hypr"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
+log "Restoring waybar"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
+log "Restoring starship"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship --ignore=themes/*
+log "Restoring bashrc"
 stow --dotfiles $STOW_V $STOW_N -d $DOTFILES_DIR -t ~ bashrc
 
 log "Dotfiles restored successfully"
