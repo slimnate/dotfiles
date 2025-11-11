@@ -85,7 +85,8 @@
 #hyprland-window,
 #custom-omarchy,
 #custom-screenrecording-indicator,
-#custom-update {
+#custom-update,
+#mpris {
   min-width: 12px;
   margin: 0 10px;
 }
@@ -163,4 +164,44 @@ tooltip {
 
 #custom-screenrecording-indicator.active {
   color: #a55555;
+}
+
+#mpris {
+  font-size: 16px;
+  margin-left: 16px;
+  color: @foreground;
+  background-color: @background;
+}
+
+#mpris.playing {
+  color: @foreground;
+}
+
+#mpris.paused {
+  opacity: 0.7;
+}
+
+#mpris.stopped {
+  opacity: 0.5;
+}
+
+#mpris.disconnected {
+  opacity: 0.4;
+  color: @foreground;
+}
+
+#mpris.spotify {
+  color:#35C76B;
+}
+
+#mpris.youtube {
+  color:#FB0036;
+}
+
+#mpris.firefox {
+  color:#FF0000;
+}
+
+#mpris.microsoft-edge {
+  color:#F35804;
 }
