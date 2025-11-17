@@ -11,3 +11,6 @@ sudo pacman -S starship
 
 # Install asciiquarium
 sudo pacman -S asciiquarium
+
+# Install rsync
+sudo pacman -S rsync
