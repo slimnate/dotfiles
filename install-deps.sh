@@ -1,10 +1,10 @@
 
 # Install microsoft-edge-stable-bin from AUR and configure as default browser
-sudo yay -S microsoft-edge-stable-bin
+yay -S microsoft-edge-stable-bin
 xdg-settings set default-web-browser microsoft-edge-stable-bin.desktop
 
 # Install Joplin notes
-sudo yay -S joplin-desktop
+yay -S joplin-desktop
 
 #Install starship prompt
 sudo pacman -S starship
@@ -14,3 +14,6 @@ sudo pacman -S asciiquarium
 
 # Install rsync
 sudo pacman -S rsync
+
+# Install polychromatic for Razer devices
+yay -S polychromatic
