@@ -113,6 +113,16 @@ Starship prompt config. Custom themes in the `themes` dir. Just copy the content
 ### Waybar
 Custom configuration for waybar.
 
+### Microsoft Edge `HubApps` to enable sidebar/copilot mode
+If the `~/.config/microsoft-edge/Default/HubApps` file does not exist, the `stow-restore.sh` script will seed one to enable sidebar and Copilot mode support. **This will require a restart of Edge.**
+
+##### About the HubApps file
+This file is a required configuration file for Microsoft Edge Sidebar to work, but is not included in the edge installer. It was taken from: [`https://github.com/RPDJF/dotfiles/blob/master/.myconfig/ressources/HubApps`](https://github.com/RPDJF/dotfiles/blob/master/.myconfig/ressources/HubApps)
+
+See the following resources for more info:
+[https://github.com/MicrosoftEdge/DevTools/issues/278](https://github.com/MicrosoftEdge/DevTools/issues/278)
+[https://dev.to/0xtanzim/how-to-fix-the-copilot-sidebar-in-microsoft-edge-on-linux-efd](https://dev.to/0xtanzim/how-to-fix-the-copilot-sidebar-in-microsoft-edge-on-linux-efd)
+
 ### Project Launcher
 `hypr/scripts/cursor-dev-launcher` opens a simple picker (via `walker`) to select a project and launch it in Cursor (via `uwsm`). Bound to `SUPER+SHIFT+ALT+Space`
 

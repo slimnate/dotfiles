@@ -67,7 +67,7 @@ run mv $CONFIG_DIR/waybar $BACKUP_DIR/waybar
 run mv $CONFIG_DIR/starship.toml $BACKUP_DIR/starship.toml
 run mv $HOME/.bashrc $BACKUP_DIR/.bashrc
 
-# Backup the omarchy and systemd directories (copy instead of move)
+# Backup the omarchy, systemd, and microsoft-edge directories (copy instead of move)
 run cp -r $CONFIG_DIR/omarchy $BACKUP_DIR/omarchy
 run cp -r $CONFIG_DIR/systemd $BACKUP_DIR/systemd
 
@@ -120,5 +120,11 @@ omarchy-theme-set synthwave84
 # run systemctl --user enable --now omarchy-bg-next.timer
 # run systemctl --user start omarchy-bg-next.service || true
 # log "Omarchy background timer enabled. View logs with: journalctl --user -u omarchy-bg-next.service -e"
+
+# Seed HubApps file for Microsoft Edge (only if it doesn't exist, so as not to overwrite modified settings)
+log "Seeding HubApps file for Microsoft Edge"
+if [ ! -f $CONFIG_DIR/microsoft-edge/Default/HubApps ]; then
+  run cp -r $DOTFILES_DIR/microsoft-edge/Default/HubApps $CONFIG_DIR/microsoft-edge/Default/HubApps
+fi
 
 log "Dotfiles restored successfully"
