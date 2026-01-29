@@ -1,0 +1,14 @@
+; Systemd user service to cycle Omarchy theme background
+[Unit]
+Description=Cycle Omarchy theme background
+After=graphical-session.target
+
+[Service]
+Type=oneshot
+Environment=PATH=%h/.local/share/omarchy/bin:%h/.local/bin:/usr/local/bin:/usr/bin
+ExecStart=/usr/bin/env omarchy-theme-bg-next
+; If needed for Wayland, uncomment and adjust:
+; Environment=WAYLAND_DISPLAY=wayland-1
+Environment=XDG_RUNTIME_DIR=%t
+Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=%t/bus
+; Environment=DISPLAY=:0

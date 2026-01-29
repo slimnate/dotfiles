@@ -1,0 +1,11 @@
+[Unit]
+Description=Run omarchy-theme-bg-next periodically
+After=graphical-session.target
+
+[Timer]
+OnBootSec=5s
+OnUnitActiveSec=5s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
