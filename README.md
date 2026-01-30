@@ -19,13 +19,18 @@ Run the `install-deps.sh` script to install dependencies not included in Omarchy
 
 ```bash
 chmod +x ./install-deps.sh
-./stow-restore.sh
+./install-deps.sh
 ```
 
-Current deps installed:
+Required deps installed:
+- [GNU Stow](https://www.gnu.org/software/stow/) for stowing
+- [rsync](https://wiki.archlinux.org/title/Rsync) for managing backup files
+
+Optional deps that will be prompted before installing
 - Microsoft Edge (set as default browser with this script as well)
 - [Starship](https://starship.rs/) terminal prompt
 - [Joplin](https://joplinapp.org/) notes
+- [polychromatic](https://aur.archlinux.org/packages/polychromatic) for razer devices
 
 ### Run stow restore
 This script backs up any existing configs, removes previous Stow links for these targets, and then stows this repo.
