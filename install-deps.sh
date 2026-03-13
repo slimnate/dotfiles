@@ -4,6 +4,9 @@
 # Install gnu stow and rsync
 sudo pacman -S stow rsync
 
+# Install wget (used in other install scripts, plus I want it installed anyway)
+sudo pacman -S wget
+
 # Optional deps
 function prompt_install()
 {
@@ -39,11 +42,12 @@ else
     echo "Skipping Asciiquarium..."
 fi
 
-# Install microsoft-edge-stable-bin from AUR and configure as default browser
+# Install custom version of Microsoft Edge and configure as default browser
 if prompt_install "Microsoft Edge and set as default browser"; then
     echo "Installing Microsoft Edge..."
-    yay -S microsoft-edge-stable-bin
-    xdg-settings set default-web-browser microsoft-edge-stable-bin.desktop
+    sudo chmod +x ./install-microsoft-edge-version.sh
+    ./install-microsoft-edge-version.sh 143.0.3650.96
+    xdg-settings set default-web-browser microsoft-edge.desktop
 else
     echo "Skipping Microsoft Edge..."
 fi
