@@ -71,6 +71,9 @@ run mv $HOME/.bashrc $BACKUP_DIR/.bashrc
 run cp -r $CONFIG_DIR/omarchy $BACKUP_DIR/omarchy
 run cp -r $CONFIG_DIR/systemd $BACKUP_DIR/systemd
 
+# Backup system pacman config (copy instead of move)
+run sudo mv /etc/pacman.conf $BACKUP_DIR/pacman.conf
+
 # Create the configuration file directories if they don't exist
 run mkdir -p $CONFIG_DIR/alacritty
 run mkdir -p $CONFIG_DIR/bash
@@ -89,6 +92,7 @@ stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR omarchy
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR systemd
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $HOME bashrc
+sudo stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t /etc pacman
 
 # Restore the configuration files from the dotfiles repository
 log "Restoring the configuration files from the dotfiles repository"
@@ -104,6 +108,8 @@ log "Restoring starship"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship --ignore=themes/*
 log "Restoring bashrc"
 stow --dotfiles $STOW_V $STOW_N -d $DOTFILES_DIR -t ~ bashrc
+log "Restoring pacman"
+sudo stow $STOW_V $STOW_N -d $DOTFILES_DIR -t /etc pacman
 
 # Set up theme
 echo "Restoring custom themes..."
