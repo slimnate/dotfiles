@@ -26,6 +26,14 @@ else
     echo "Skipping Joplin Notes..."
 fi
 
+# Install Windsurf
+if prompt_install "Windsurf"; then
+    echo "Installing Windsurf..."
+    yay -S windsurf
+else
+    echo "Skipping Windsurf..."
+fi
+
 #Install starship prompt
 if prompt_install "Starship Prompt (custom terminal prompt)"; then
     echo "Installing Starship Prompt..."
