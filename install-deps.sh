@@ -26,12 +26,12 @@ else
     echo "Skipping Joplin Notes..."
 fi
 
-# Install Windsurf
-if prompt_install "Windsurf"; then
-    echo "Installing Windsurf..."
-    yay -S windsurf
+# Install Windscribe
+if prompt_install "Windscribe"; then
+    echo "Installing Windscribe..."
+    yay -S windscribe-v2-bin
 else
-    echo "Skipping Windsurf..."
+    echo "Skipping Windscribe..."
 fi
 
 #Install starship prompt
