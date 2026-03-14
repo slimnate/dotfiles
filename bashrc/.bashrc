@@ -11,7 +11,10 @@ source ~/.local/share/omarchy/default/bash/rc
 PATH="$HOME/.local/bin:$PATH"
 
 # Source the environment variables
-. "$HOME/.local/share/../bin/env"
+ENV_FILE="$HOME/.local/bin/env"
+if [ -f "$ENV_FILE" ]; then
+  . "$ENV_FILE"
+fi
 
 # Source the SSH agent
 source "$HOME/.config/bash/ssh-agent.sh"
