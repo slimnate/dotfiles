@@ -26,11 +26,19 @@ Required deps installed:
 - [GNU Stow](https://www.gnu.org/software/stow/) for stowing
 - [rsync](https://wiki.archlinux.org/title/Rsync) for managing backup files
 
-Optional deps that will be prompted before installing
+Optional deps that will be prompted before installing:
 - Microsoft Edge (set as default browser with this script as well)
 - [Starship](https://starship.rs/) terminal prompt
 - [Joplin](https://joplinapp.org/) notes
+- Windscribe VPN (`windscribe-v2-bin`)
+- [Tailscale](https://tailscale.com/)
 - [polychromatic](https://aur.archlinux.org/packages/polychromatic) for razer devices
+
+If you install Tailscale, finish setup by bringing the daemon online and authenticating:
+
+```bash
+sudo tailscale up
+```
 
 ### Run stow restore
 This script backs up any existing configs, removes previous Stow links for these targets, and then stows this repo.
@@ -87,6 +95,29 @@ ssh-add -l
 - `hypr/input.conf` - Input config. Custom mouse acceleration profile
 - `hypr/looknfeel.conf` - Look and feel config
 - `hypr/monitors.conf` - Monitor config
+
+#### Hypr profiles (laptop vs desktop)
+Input and idle behavior now use profile selector files so you can switch machine-specific behavior without editing the base configs:
+
+- `hypr/input.conf` sources `hypr/input.profile.conf`
+- `hypr/hypridle.conf` sources `hypr/hypridle.profile.conf`
+
+Available profile override files:
+
+- `hypr/input.laptop.conf` and `hypr/input.desktop.conf` (mouse sensitivity overrides)
+- `hypr/hypridle.laptop.conf` and `hypr/hypridle.desktop.conf` (`inhibit_sleep` behavior)
+
+To switch profiles, edit the selector files and keep only one `source = ...` line uncommented in each:
+
+```bash
+# Input profile selector
+nvim ~/.config/hypr/input.profile.conf
+
+# Hypridle profile selector
+nvim ~/.config/hypr/hypridle.profile.conf
+```
+
+Then reload Hyprland (default binding: `SUPER + R`).
 
 #### Keybindings
 | Keybinding | Action | Description |
