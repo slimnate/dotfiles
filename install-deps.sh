@@ -34,6 +34,14 @@ else
     echo "Skipping Windscribe..."
 fi
 
+# Install Tailscale
+if prompt_install "Tailscale"; then
+    echo "Installing Tailscale..."
+    curl -fsSL https://tailscale.com/install.sh | sh
+else
+    echo "Skipping Tailscale..."
+fi
+
 #Install starship prompt
 if prompt_install "Starship Prompt (custom terminal prompt)"; then
     echo "Installing Starship Prompt..."
