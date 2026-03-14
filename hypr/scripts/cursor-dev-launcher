@@ -263,6 +263,7 @@ if [[ -z "${selection_path:-}" ]]; then
   # Fallback: if only one field came back, assume it is the path
   selection_path="$selection"
 fi
+
 log "Selected value: $selection_path"
 if [[ "$DEBUG" == 1 ]]; then
   log "Raw rows saved: $raw_rows_file (lines=$(wc -l < "$raw_rows_file"))"
