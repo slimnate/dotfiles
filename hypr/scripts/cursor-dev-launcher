@@ -16,7 +16,8 @@ BASE_DIRS=(
 )
 PROJECTS=(
   "Custom Dotfiles|$HOME/.dotfiles"
-  "Omarchy local config|$HOME/.local/share/omarchy"
+  "Omarchy Config|$HOME/.local/share/omarchy"
+  "OpenClaw Config|$HOME/.openclaw"
 )
 
 # Debug logging (export CURSOR_DEV_DEBUG=1 to enable)
@@ -263,6 +264,7 @@ if [[ -z "${selection_path:-}" ]]; then
   # Fallback: if only one field came back, assume it is the path
   selection_path="$selection"
 fi
+
 log "Selected value: $selection_path"
 if [[ "$DEBUG" == 1 ]]; then
   log "Raw rows saved: $raw_rows_file (lines=$(wc -l < "$raw_rows_file"))"
@@ -274,4 +276,22 @@ if [[ "$DEBUG" == 1 ]]; then
 fi
 
 # selection_path is the absolute path (value column)
-exec uwsm app -- cursor "$selection_path"
+project_name="$(basename "$selection_path")"
+cursor_bin="/usr/bin/cursor"
+
+# Foreground uwsm-app hangs when this script is spawned by Hypr; launch detached instead.
+setsid uwsm-app -- "$cursor_bin" -n "$selection_path" </dev/null >/dev/null 2>&1 &
+
+cursor_addr=""
+for _ in {1..30}; do
+  cursor_addr="$(hyprctl clients -j | jq -r --arg n "$project_name" '
+    .[] | select(.class == "cursor" and (.title | test($n; "i"))) | .address' | head -1)"
+  if [[ -n "$cursor_addr" ]]; then
+    hyprctl dispatch focuswindow "address:${cursor_addr}" >/dev/null 2>&1 || true
+    break
+  fi
+  sleep 0.1
+done
+if [[ -z "$cursor_addr" ]]; then
+  hyprctl dispatch focuswindow class:cursor >/dev/null 2>&1 || true
+fi
