@@ -80,13 +80,59 @@ ssh-add -l
 - `hypr/autostart.conf` - Sets up window rules for how I like to configure my virtual desktops. Launches cursor, edge, Joplin, and spotify
 - `hypr/bindings.conf` - Set up custom keybindings (see [Keybindings](#keybindings) below)
 - `hypr/envs.conf` - Extra environment variables - currently empty
-- `hypr/hypridle.conf` - hypridle config
+- `hypr/hypridle.conf` - Shared hypridle config; sources the active idle profile
+- `hypr/hypridle.profile.conf` - Switches between laptop/desktop hypridle overrides
+- `hypr/hypridle.laptop.conf` / `hypr/hypridle.desktop.conf` - Host-specific idle overrides
 - `hypr/hyprland.conf` - Base hyprland conf; sources all the other files in this directory
 - `hypr/hyprlock.conf` - Lock screen config
 - `hypr/hyprsunset.conf` - Omarchy default - disables hyprsunset
-- `hypr/input.conf` - Input config. Custom mouse acceleration profile
+- `hypr/input.conf` - Shared input config (mouse accel, touchpad, etc.); sources the active input profile
+- `hypr/input.profile.conf` - Switches between laptop/desktop input overrides
+- `hypr/input.laptop.conf` / `hypr/input.desktop.conf` - Host-specific input overrides
 - `hypr/looknfeel.conf` - Look and feel config
 - `hypr/monitors.conf` - Monitor config
+
+#### Laptop / desktop profiles
+Shared Hyprland and hypridle settings live in `input.conf` and `hypridle.conf`. Host-specific tweaks are kept in small profile files so the same repo works on both machines.
+
+**How it works**
+1. `input.conf` sources `~/.config/hypr/input.profile.conf`
+2. `hypridle.conf` sources `~/.config/hypr/hypridle.profile.conf`
+3. Each `*.profile.conf` sources exactly one of `*.laptop.conf` or `*.desktop.conf`
+
+**How to switch**
+Edit both profile switchers and leave only one `source` line active in each:
+
+```conf
+# hypr/input.profile.conf
+source = ~/.config/hypr/input.laptop.conf
+# source = ~/.config/hypr/input.desktop.conf
+```
+
+```conf
+# hypr/hypridle.profile.conf
+source = ~/.config/hypr/hypridle.laptop.conf
+# source = ~/.config/hypr/hypridle.desktop.conf
+```
+
+Then reload:
+
+```bash
+hyprctl reload
+# restart hypridle if idle settings should apply immediately
+systemctl --user restart hypridle.service
+```
+
+Keep laptop/desktop selection in sync across both profile files.
+
+**Differences**
+
+| Setting | Laptop | Desktop |
+|---------|--------|---------|
+| Pointer `sensitivity` (`input.*.conf`) | `0.05` (slightly faster trackpad/pointer feel) | `-0.5` (slower / less twitchy for desk mouse) |
+| `inhibit_sleep` (`hypridle.*.conf`) | `1` (normal idle inhibit) | `3` (wait until the screen is locked before sleep) |
+
+Shared input settings that apply on both hosts (accel profile, touchpad scroll factor, Razer Basilisk device curve, etc.) stay in `input.conf`. Put new machine-specific overrides in the matching `*.laptop.conf` / `*.desktop.conf` files instead of forking the shared configs.
 
 #### Keybindings
 | Keybinding | Action | Description |

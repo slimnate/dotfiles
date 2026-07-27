@@ -80,7 +80,7 @@ run mkdir -p $CONFIG_DIR/omarchy
 run mkdir -p $CONFIG_DIR/systemd
 
 # Undo linking all of the dotfiles before restoring them
-log "Undoing linking all of the dotfiles before restoring them"
+echo "Unlinking old dotfiles..."
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
@@ -91,18 +91,18 @@ stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR systemd
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $HOME bashrc
 
 # Restore the configuration files from the dotfiles repository
-log "Restoring the configuration files from the dotfiles repository"
-log "Restoring alacritty"
+echo "Linking new dotfiles..."
+echo "Linking alacritty"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
-log "Restoring bash"
+echo "Linking bash"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
-log "Restoring hypr"
+echo "Linking hypr"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
-log "Restoring waybar"
+echo "Linking waybar"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
-log "Restoring starship"
+echo "Linking starship"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship --ignore=themes/*
-log "Restoring bashrc"
+echo "Linking bashrc"
 stow --dotfiles $STOW_V $STOW_N -d $DOTFILES_DIR -t ~ bashrc
 
 # Set up theme
@@ -127,4 +127,4 @@ if [ ! -f $CONFIG_DIR/microsoft-edge/Default/HubApps ]; then
   run cp -r $DOTFILES_DIR/microsoft-edge/Default/HubApps $CONFIG_DIR/microsoft-edge/Default/HubApps
 fi
 
-log "Dotfiles restored successfully"
+echo "Dotfiles restored successfully"
