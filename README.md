@@ -197,6 +197,21 @@ User units in `systemd/user/`:
 
 These are stowed with the rest of the config. The enable/start steps in `stow-restore.sh` are currently commented out; enable manually if you want the timer.
 
+### Sunshine
+Configuration for [Sunshine](https://github.com/LizardByte/Sunshine) game/desktop streaming.
+
+- `sunshine/sunshine.conf` - main Sunshine config (capture backend, NVENC encoder, log level, etc.)
+- `sunshine/apps.json` - defines a `Desktop` app whose `prep-cmd` hooks start/stop a headless Hyprland output for streaming:
+  - `hypr/scripts/sunshine-session-start` - runs when a Sunshine client connects
+  - `hypr/scripts/sunshine-session-stop` - runs when the client disconnects
+
+Both files are stowed into `~/.config/sunshine/`.
+
+#### Systemd service drop-in
+`systemd/user/sunshine.service.d/override.conf` adds `After=graphical-session.target` and `PartOf=graphical-session.target` so the `sunshine.service` user unit starts after the graphical session is ready and stops with it.
+
+`stow-restore.sh` stows the `systemd` package into `~/.config/systemd/`, which links everything under `systemd/user/` (including `sunshine.service.d/override.conf`) into `~/.config/systemd/user/`. Stow refuses to overwrite non-symlinks, so any existing files already in `~/.config/systemd/user/` are left untouched and will surface as conflicts rather than being clobbered. After linking, the script runs `systemctl --user daemon-reload` so new/updated units are picked up immediately.
+
 ### Microsoft Edge `HubApps` to enable sidebar/copilot mode
 If the `~/.config/microsoft-edge/Default/HubApps` file does not exist, the `stow-restore.sh` script will seed one to enable sidebar and Copilot mode support. **This will require a restart of Edge.**
 

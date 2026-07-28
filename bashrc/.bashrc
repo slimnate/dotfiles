@@ -18,3 +18,6 @@ source "$HOME/.config/bash/ssh-agent.sh"
 
 # Source the Starship prompt
 eval "$(starship init bash)"
+
+# OpenClaw Completion
+source "/home/slim/.openclaw/completions/openclaw.bash"

@@ -64,6 +64,7 @@ run mv $CONFIG_DIR/alacritty $BACKUP_DIR/alacritty
 run mv $CONFIG_DIR/bash $BACKUP_DIR/bash
 run mv $CONFIG_DIR/hypr $BACKUP_DIR/hypr
 run mv $CONFIG_DIR/waybar $BACKUP_DIR/waybar
+run mv $CONFIG_DIR/sunshine $BACKUP_DIR/sunshine
 run mv $CONFIG_DIR/starship.toml $BACKUP_DIR/starship.toml
 run mv $HOME/.bashrc $BACKUP_DIR/.bashrc
 
@@ -76,6 +77,7 @@ run mkdir -p $CONFIG_DIR/alacritty
 run mkdir -p $CONFIG_DIR/bash
 run mkdir -p $CONFIG_DIR/hypr
 run mkdir -p $CONFIG_DIR/waybar
+run mkdir -p $CONFIG_DIR/sunshine
 run mkdir -p $CONFIG_DIR/omarchy
 run mkdir -p $CONFIG_DIR/systemd
 
@@ -85,6 +87,7 @@ stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/sunshine sunshine
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR omarchy
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR systemd
@@ -100,6 +103,8 @@ echo "Linking hypr"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
 echo "Linking waybar"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
+log "Restoring sunshine"
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/sunshine sunshine
 echo "Linking starship"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship --ignore=themes/*
 echo "Linking bashrc"
