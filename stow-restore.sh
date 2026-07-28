@@ -40,7 +40,7 @@ shift $((OPTIND - 1))
 
 # Helpers
 run() { if [ "$DRY_RUN" -eq 1 ]; then echo "+ $*"; else "$@"; fi; }
-log() { [ "$VERBOSE" -eq 1 ] && echo "$*"; }
+log() { if [ "$VERBOSE" -eq 1 ]; then echo "$*"; fi; }
 
 STOW_N=$([ "$DRY_RUN" -eq 1 ] && echo "-n")
 STOW_V=$([ "$VERBOSE" -eq 1 ] && echo "-v")
@@ -90,7 +90,7 @@ stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/waybar waybar
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/sunshine sunshine
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR omarchy
-stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR systemd
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/systemd systemd
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $HOME bashrc
 
 # Restore the configuration files from the dotfiles repository
@@ -115,16 +115,14 @@ echo "Restoring custom themes..."
 run rsync -a $STOW_V $STOW_N --progress ~/.dotfiles/omarchy/themes ~/.config/omarchy --exclude=**/.git
 omarchy-theme-set synthwave84
 
-# log "Copying systemd files"
-# run rm -rf ~/.config/systemd/user/omarchy-bg-next.service
-# run rm -rf ~/.config/systemd/user/omarchy-bg-next.timer
-# # run rsync -a $STOW_V $STOW_N --progress ~/.dotfiles/systemd/user ~/.config/systemd
-
-# # Reload user daemon and enable timer for Omarchy background rotation
-# run systemctl --user daemon-reload
-# run systemctl --user enable --now omarchy-bg-next.timer
-# run systemctl --user start omarchy-bg-next.service || true
-# log "Omarchy background timer enabled. View logs with: journalctl --user -u omarchy-bg-next.service -e"
+# Stow the systemd user service files. mkdir of the user/ directory prevents
+# stow from tree-folding the whole user/ directory into a single symlink. Stow
+# will refuse to overwrite any non-symlink file, so existing contents of
+# ~/.config/systemd/user/ are left untouched.
+log "Restoring systemd user services"
+run mkdir -p $CONFIG_DIR/systemd/user
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/systemd systemd
+run systemctl --user daemon-reload
 
 # Seed HubApps file for Microsoft Edge (only if it doesn't exist, so as not to overwrite modified settings)
 log "Seeding HubApps file for Microsoft Edge"

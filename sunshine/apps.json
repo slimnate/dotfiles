@@ -1,0 +1,11 @@
+{
+    "env": {},
+    "apps": [
+        {
+            "name": "Desktop",
+            "prep-cmd": [],
+            "exclude-global-prep-cmd": "false",
+            "auto-detach": "true"
+        }
+    ]
+}

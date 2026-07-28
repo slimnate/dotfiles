@@ -1,0 +1,13 @@
+{
+  "sessionId": "1dbe2e",
+  "hypothesisId": "H5",
+  "location": "cursor-dev-launcher:launch",
+  "message": "uwsm-app launch result",
+  "data": {
+    "exit": 0,
+    "stderr": "",
+    "path": "/home/slim/Documents/dev/job-bot",
+    "cmd": "setsid uwsm-app -- cursor -n"
+  },
+  "timestamp": 1783709070000
+}

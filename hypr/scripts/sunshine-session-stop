@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+hyprctl output remove HEADLESS-2 2>/dev/null || true
