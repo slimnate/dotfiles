@@ -16,7 +16,7 @@ BASE_DIRS=(
 )
 PROJECTS=(
   "Custom Dotfiles|$HOME/.dotfiles"
-  "Omarchy Config|$HOME/.local/share/omarchy"
+  "Omarchy Config|/usr/share/omarchy"
   "OpenClaw Config|$HOME/.openclaw"
 )
 

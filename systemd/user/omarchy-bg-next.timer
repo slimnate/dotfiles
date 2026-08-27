@@ -3,8 +3,10 @@ Description=Run omarchy-theme-bg-next periodically
 After=graphical-session.target
 
 [Timer]
-OnBootSec=5s
-OnUnitActiveSec=5s
+# First rotation shortly after login.
+OnBootSec=1min
+# Rotate 5 minutes after each successful cycle completes.
+OnUnitInactiveSec=5min
 Persistent=true
 
 [Install]

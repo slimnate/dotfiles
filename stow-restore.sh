@@ -63,11 +63,10 @@ run mkdir -p $BACKUP_DIR
 run mv $CONFIG_DIR/alacritty $BACKUP_DIR/alacritty
 run mv $CONFIG_DIR/bash $BACKUP_DIR/bash
 run mv $CONFIG_DIR/hypr $BACKUP_DIR/hypr
-run mv $CONFIG_DIR/sunshine $BACKUP_DIR/sunshine
 run mv $CONFIG_DIR/starship.toml $BACKUP_DIR/starship.toml
 run mv $HOME/.bashrc $BACKUP_DIR/.bashrc
 
-# Backup the omarchy, systemd, and microsoft-edge directories (copy instead of move)
+# Backup the omarchy and systemd directories (copy instead of move)
 run cp -r $CONFIG_DIR/omarchy $BACKUP_DIR/omarchy
 run cp -r $CONFIG_DIR/systemd $BACKUP_DIR/systemd
 
@@ -75,7 +74,6 @@ run cp -r $CONFIG_DIR/systemd $BACKUP_DIR/systemd
 run mkdir -p $CONFIG_DIR/alacritty
 run mkdir -p $CONFIG_DIR/bash
 run mkdir -p $CONFIG_DIR/hypr
-run mkdir -p $CONFIG_DIR/sunshine
 run mkdir -p $CONFIG_DIR/omarchy
 run mkdir -p $CONFIG_DIR/systemd
 
@@ -84,7 +82,6 @@ echo "Unlinking old dotfiles..."
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/alacritty alacritty
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
-stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/sunshine sunshine
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/omarchy omarchy
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR systemd
@@ -98,30 +95,27 @@ echo "Linking bash"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/bash bash
 echo "Linking hypr"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
-log "Restoring sunshine"
-stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/sunshine sunshine
 echo "Linking starship"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship --ignore=themes/*
 echo "Linking omarchy (shell.json, plugins, bar)"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/omarchy omarchy --ignore='themes/*'
+echo "Linking systemd"
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR systemd
 echo "Linking bashrc"
 stow --dotfiles $STOW_V $STOW_N -d $DOTFILES_DIR -t ~ bashrc
 
 # Set up theme
 echo "Restoring custom themes..."
 run rsync -a $STOW_V $STOW_N --progress ~/.dotfiles/omarchy/themes ~/.config/omarchy --exclude=**/.git
-omarchy-theme-set synthwave84
+run omarchy theme set synthwave84
 
-# log "Copying systemd files"
-# run rm -rf ~/.config/systemd/user/omarchy-bg-next.service
-# run rm -rf ~/.config/systemd/user/omarchy-bg-next.timer
-# # run rsync -a $STOW_V $STOW_N --progress ~/.dotfiles/systemd/user ~/.config/systemd
-
-# # Reload user daemon and enable timer for Omarchy background rotation
-# run systemctl --user daemon-reload
-# run systemctl --user enable --now omarchy-bg-next.timer
-# run systemctl --user start omarchy-bg-next.service || true
-# log "Omarchy background timer enabled. View logs with: journalctl --user -u omarchy-bg-next.service -e"
+log "Enabling Omarchy background rotation timer"
+run systemctl --user daemon-reload
+run systemctl --user enable --now omarchy-bg-next.timer
+# Kick once so OnUnitInactiveSec schedules the next rotation (OnBootSec alone
+# does not re-fire after daemon-reload).
+run systemctl --user start omarchy-bg-next.service || true
+log "Background timer: systemctl --user list-timers omarchy-bg-next.timer"
 
 # Seed HubApps file for Microsoft Edge (only if it doesn't exist, so as not to overwrite modified settings)
 log "Seeding HubApps file for Microsoft Edge"
