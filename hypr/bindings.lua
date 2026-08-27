@@ -15,7 +15,10 @@ o.bind("SUPER + SHIFT + A", "Grok", { webapp = "https://grok.com" })
 o.bind("SUPER + SHIFT + ALT + A", "ChatGPT", { webapp = "https://chatgpt.com" })
 
 -- Lazygit + GitHub (GitHub replaces Signal on SUPER+SHIFT+G).
-o.bind("SUPER + SHIFT + L", "Lazygit", { tui = "lazygit", focus = true })
+o.bind("SUPER + SHIFT + L", "Lazygit", {
+  focus = "org.omarchy.lazygit",
+  launch = "alacritty --class org.omarchy.lazygit --title lazygit -e lazygit",
+})
 hl.unbind("SUPER + SHIFT + G")
 o.bind("SUPER + SHIFT + G", "GitHub", { webapp = "https://github.com/" })
 
