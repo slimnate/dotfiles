@@ -1,0 +1,76 @@
+{
+  "plugins": [
+    {
+      "id": "bitr0t.spotify-menu-chip",
+      "url": "https://github.com/rmacy/omarchy-audio-visualizer.git"
+    },
+    {
+      "id": "bitr0t.system-monitor",
+      "url": "https://github.com/rmacy/omarchy-system-monitor.git"
+    },
+    {
+      "id": "com.github.djkawada.razer-control",
+      "url": "https://github.com/Djkawada/omarchy-razer-control.git"
+    },
+    {
+      "id": "crmne.ultimate-guitar",
+      "url": "https://github.com/crmne/omarchy-ultimate-guitar.git"
+    },
+    {
+      "id": "cucu0628.deskmate",
+      "url": "https://github.com/cucu0628/omarchy-deskmate.git"
+    },
+    {
+      "id": "dev.git",
+      "url": "https://github.com/ariadev/omarchy-dev-git.git"
+    },
+    {
+      "id": "io.github.alexdont.color-studio",
+      "url": "https://github.com/alexdont/color-studio.git"
+    },
+    {
+      "id": "io.github.chris.snitch",
+      "url": "https://github.com/ccdwyer/omarchy-snitch.git"
+    },
+    {
+      "id": "io.github.iainfreestone.toolroll",
+      "url": "https://github.com/iainfreestone/omarchy-toolroll.git"
+    },
+    {
+      "id": "io.github.ilkaydnc.omargb",
+      "url": "https://github.com/ilkaydnc/omargb.git"
+    },
+    {
+      "id": "io.github.juancasanueva.developer-control-center",
+      "url": "https://github.com/juancasanueva/omarchy-developer-control-center.git"
+    },
+    {
+      "id": "io.github.randazraik.xray",
+      "url": "https://github.com/RandaZraik/omarchy-xray.git"
+    },
+    {
+      "id": "io.github.roman.ovaxry",
+      "url": "https://github.com/Roman-Weisman/ovaxry.git"
+    },
+    {
+      "id": "io.github.twoscott.mouse-battery",
+      "url": "https://github.com/twoscott/omarchy-mouse-battery.git"
+    },
+    {
+      "id": "kairos.day-in-history",
+      "url": "https://github.com/kairos-tech-oh/omarchy-this-day-in-history.git"
+    },
+    {
+      "id": "mryll.meteobar",
+      "url": "https://github.com/mryll/meteobar.git"
+    },
+    {
+      "id": "omamail",
+      "url": "https://github.com/huacnlee/omamail.git"
+    },
+    {
+      "id": "omaplug",
+      "url": "https://github.com/fross100/omaplug.git"
+    }
+  ]
+}

@@ -17,7 +17,19 @@
           "id": "slim.workspaces"
         },
         {
-          "id": "omarchy.media"
+          "id": "bitr0t.spotify-menu-chip"
+        },
+        {
+          "id": "dev.git"
+        },
+        {
+          "id": "slim.projects"
+        },
+        {
+          "id": "io.github.juancasanueva.developer-control-center"
+        },
+        {
+          "id": "io.github.alexdont.color-studio"
         }
       ],
       "center": [
@@ -37,7 +49,17 @@
           "id": "omarchy.keyboard-layout"
         },
         {
-          "id": "omarchy.weather"
+          "id": "mryll.meteobar"
+        },
+        {
+          "id": "com.github.djkawada.razer-control"
+        },
+        {
+          "id": "io.github.ilkaydnc.omargb",
+          "off": {}
+        },
+        {
+          "id": "kairos.day-in-history"
         },
         {
           "id": "omarchy.system-update"
@@ -46,6 +68,21 @@
       "right": [
         {
           "id": "omarchy.tray"
+        },
+        {
+          "id": "io.github.twoscott.mouse-battery"
+        },
+        {
+          "id": "omamail"
+        },
+        {
+          "id": "crmne.ultimate-guitar"
+        },
+        {
+          "id": "io.github.chris.snitch"
+        },
+        {
+          "id": "io.github.randazraik.xray"
         },
         {
           "id": "omarchy.tailscale"
@@ -63,13 +100,13 @@
           "id": "omarchy.audio"
         },
         {
-          "id": "slim.cpu"
-        },
-        {
-          "id": "slim.memory"
+          "id": "bitr0t.system-monitor"
         },
         {
           "id": "slim.disk"
+        },
+        {
+          "id": "omaplug"
         },
         {
           "id": "omarchy.monitor"
@@ -80,5 +117,18 @@
       ]
     }
   },
-  "plugins": []
+  "plugins": [
+    {
+      "id": "io.github.iainfreestone.toolroll"
+    },
+    {
+      "id": "slim.projects"
+    }
+  ],
+  "disabledPlugins": [
+    "omarchy.media"
+  ],
+  "cloneSourceRestores": [
+    "bitr0t.spotify-menu-chip"
+  ]
 }

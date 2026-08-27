@@ -48,6 +48,7 @@ chmod +x ./stow-restore.sh
 - Stows packages: `alacritty`, `bash`, `hypr`, `starship`, `omarchy`, `systemd`, and `bashrc` → `~/.bashrc`
 - Syncs `omarchy/themes` into `~/.config/omarchy` and runs `omarchy theme set synthwave84`
 - Seeds Microsoft Edge `HubApps` if missing (see below)
+- Clones missing third-party plugins from `plugin-sources.json` via `install-plugins.sh` (forwards `-n` / `-v`)
 
 To restore the most recent backup instead of stowing:
 
@@ -65,6 +66,25 @@ This delegates to `restore-backup.sh`.
 | -v   | Verbose output of what the script is doing. |
 | -n   | Dry run. Does not modify any files, just prints a list of commands to be executed. This still runs `stow` with `-n` so you can see all changes stow would make. |
 | -r   | Restore the most recent backup via `restore-backup.sh` and exit. |
+
+### Install third-party plugins
+Custom `slim.*` plugins are vendored under `omarchy/plugins/` and stowed with the rest of the config. Third-party plugins are git clones; their URLs live in `plugin-sources.json`. Enablement and bar placement stay in `omarchy/shell.json` (`install-plugins.sh` does not pass `--enable`).
+
+`stow-restore.sh` runs `install-plugins.sh` at the end (already-installed ids are skipped). You can still run it on its own:
+
+```bash
+chmod +x ./install-plugins.sh
+./install-plugins.sh
+```
+
+To refresh the lockfile from plugins currently installed on this machine:
+
+```bash
+chmod +x ./dump-plugins.sh
+./dump-plugins.sh
+```
+
+`dump-plugins.sh -n` prints the JSON without writing. Day-to-day updates of already-cloned plugins remain `omarchy plugin update`.
 
 ## Overview of customizations
 
@@ -109,7 +129,6 @@ Omarchy Quattro loads Hyprland via Lua. Custom files under `hypr/`:
 | `autostart.lua` | `exec-once` apps |
 | `hyprsunset.conf` | Still hyprlang (read by hyprsunset) |
 | `xdph.conf` | XDG desktop portal Hyprland |
-| `scripts/cursor-dev-launcher` | Project picker for Cursor |
 
 Idle timing and lock live in `omarchy/shell.json` (`idle.screensaver` / `idle.lock`), not hypridle/hyprlock.
 
@@ -122,7 +141,7 @@ Custom overrides only (Omarchy defaults still apply unless unbound/replaced in `
 | Keybinding | Action |
 |------------|--------|
 | `SUPER + SHIFT + C` | Cursor |
-| `SUPER + SHIFT + ALT + SPACE` | Cursor project launcher |
+| `SUPER + SHIFT + ALT + SPACE` | Project launcher |
 | `SUPER + SHIFT + A` | Grok |
 | `SUPER + SHIFT + ALT + A` | ChatGPT |
 | `SUPER + SHIFT + L` | Lazygit |
@@ -133,11 +152,11 @@ Custom overrides only (Omarchy defaults still apply unless unbound/replaced in `
 ### Shell / bar
 Bar layout, idle, and widgets are configured in `omarchy/shell.json` (Quickshell / `omarchy-shell`):
 
-- Left: menu, `slim.workspaces` (persistent 1–9 with icons), media
-- Center: indicators, active window, clock, keyboard layout, weather, system update
+- Left: menu, `slim.workspaces` (persistent 1–9 with icons), media, `slim.projects`
+- Center: indicators, active window, clock, keyboard layout, system update
 - Right: tray, tailscale, agents, bluetooth, network, audio, `slim.cpu` / `slim.memory` / `slim.disk`, monitor, power
 
-Custom plugins live under `omarchy/plugins/` (`slim.workspaces`, `slim.cpu`, `slim.memory`, `slim.disk`). Stats use `omarchy/bar/scripts/system-stats`.
+Custom plugins live under `omarchy/plugins/` (`slim.workspaces`, `slim.cpu`, `slim.memory`, `slim.disk`, `slim.projects`). Stats use `omarchy/bar/scripts/system-stats`. Third-party plugin git URLs are listed in `plugin-sources.json` (see [Install third-party plugins](#install-third-party-plugins)).
 
 ### Starship
 Live prompt config is `starship/starship.toml` (stowed to `~/.config/starship.toml`). Extra theme samples live under `starship/themes/` and are kept in the repo only (`stow` ignores that directory). To try one, copy its contents into `starship.toml`.
@@ -175,17 +194,22 @@ See the following resources for more info:
 [https://dev.to/0xtanzim/how-to-fix-the-copilot-sidebar-in-microsoft-edge-on-linux-efd](https://dev.to/0xtanzim/how-to-fix-the-copilot-sidebar-in-microsoft-edge-on-linux-efd)
 
 ### Project Launcher
-`hypr/scripts/cursor-dev-launcher` opens a simple picker (via `walker`) to select a project and launch it in Cursor (via `uwsm-app`). Bound to `SUPER+SHIFT+ALT+Space`.
+`omarchy/plugins/slim.projects` is an Omarchy overlay plugin (Quickshell) that searches project directories and opens them in a configured editor. Bound to `SUPER+SHIFT+ALT+Space`. A folder icon on the left of the bar opens a panel to edit scan folders and pinned projects (right-click opens the picker).
 
-Configure search roots inside the script:
+Configure search roots, pinned projects, and editors in `omarchy/projects.json` (stowed to `~/.config/omarchy/projects.json`), or use the bar panel for folders and pinned projects:
 
-```bash
-BASE_DIRS=(
-  "$HOME/Documents/dev"
-)
-PROJECTS=(
-  "Custom Dotfiles|$HOME/.dotfiles"
-  "Omarchy Config|/usr/share/omarchy"
-  "OpenClaw Config|$HOME/.openclaw"
-)
+```json
+{
+  "defaultEditor": "cursor",
+  "baseDirs": ["~/Documents/dev"],
+  "projects": [
+    { "label": "Custom Dotfiles", "path": "~/.dotfiles" },
+    { "label": "Omarchy Config", "path": "/usr/share/omarchy" },
+    { "label": "OpenClaw Config", "path": "~/.openclaw" }
+  ],
+  "editors": [
+    { "id": "cursor", "name": "Cursor", "command": ["/usr/bin/cursor", "-n", "--classic"], "class": "cursor", "kind": "gui" },
+    { "id": "nvim", "name": "Neovim", "command": ["nvim"], "kind": "tui" }
+  ]
+}
 ```

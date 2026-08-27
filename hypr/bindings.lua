@@ -4,9 +4,13 @@
 -- See current bindings: omarchy menu keybindings --print
 
 -- Cursor (replaces Calendar on SUPER+SHIFT+C).
+-- Use /usr/bin/cursor (not the ~/.local/bin shim) plus --classic so Cursor 3
+-- opens the IDE window instead of Agents/glass. { launch = ... } wraps uwsm-app.
 hl.unbind("SUPER + SHIFT + C")
-o.bind("SUPER + SHIFT + C", "Code Editor (Cursor)", "cursor")
-o.bind("SUPER + SHIFT + ALT + SPACE", "Projects (Cursor)", "~/.config/hypr/scripts/cursor-dev-launcher")
+o.bind("SUPER + SHIFT + C", "Code Editor (Cursor)", {
+  launch = "/usr/bin/cursor --classic",
+})
+o.bind("SUPER + SHIFT + ALT + SPACE", "Projects", "omarchy-shell shell toggle slim.projects")
 
 -- Swap AI shortcuts vs Omarchy defaults (Grok on A, ChatGPT on ALT+A).
 hl.unbind("SUPER + SHIFT + A")
@@ -46,3 +50,6 @@ end
 
 -- Asciiquarium
 o.bind("SUPER + SHIFT + I", "Asciiquarium", "alacritty --title asciiquarium -e asciiquarium")
+
+-- Toolroll
+o.bind("SUPER + SHIFT + T", "Toolroll", "omarchy-shell shell toggle io.github.iainfreestone.toolroll")

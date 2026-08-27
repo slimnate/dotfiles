@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "slim.projects",
+  "name": "Projects",
+  "version": "1.1.0",
+  "author": "slim",
+  "description": "Theme-aware project picker that opens directories in a user-defined editor",
+  "kinds": [
+    "overlay",
+    "bar-widget"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "overlay": "Projects.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Projects",
+    "description": "Configure project folders and pinned projects",
+    "category": "Development",
+    "allowMultiple": false,
+    "defaultSection": "left"
+  }
+}

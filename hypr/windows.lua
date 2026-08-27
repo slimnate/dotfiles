@@ -43,6 +43,18 @@ o.window("^([Ss]potify)$", desktop_placement("9", "DP-2"))
 -- Asciiquarium fullscreen (SUPER+SHIFT+I)
 o.window({ title = "^(asciiquarium)$" }, { fullscreen = true })
 
+-- Windscribe is a custom-shaped Qt popup. Tiling it breaks hit targets
+-- (https://github.com/Windscribe/Desktop-App/issues/197). Its "Start Minimized"
+-- setting calls Qt showMinimized(), which Hyprland ignores — autostart hide
+-- lives in autostart.lua. Tray clicks should raise the existing window.
+o.window("^(Windscribe)$", {
+  float = true,
+  center = true,
+  no_initial_focus = true,
+  focus_on_activate = true,
+  tag = "-default-opacity",
+})
+
 -- Opacity: Omarchy applies ~0.985/0.96 via a default-opacity tag.
 o.window("microsoft-edge", { opacity = "1 1" })
 o.window("^([Ss]potify)$", { tag = "-default-opacity", opacity = "1 1" })

@@ -1,0 +1,38 @@
+{
+  "defaultEditor": "cursor",
+  "showStatus": true,
+  "showActivity": true,
+  "showTags": true,
+  "baseDirs": [
+    "~/Documents/dev"
+  ],
+  "projects": [
+    {
+      "label": "Custom Dotfiles",
+      "path": "~/.dotfiles"
+    },
+    {
+      "label": "Omarchy Config",
+      "path": "/usr/share/omarchy"
+    },
+    {
+      "label": "OpenClaw Config",
+      "path": "~/.openclaw"
+    }
+  ],
+  "editors": [
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "command": ["/usr/bin/cursor", "-n", "--classic"],
+      "class": "cursor",
+      "kind": "gui"
+    },
+    {
+      "id": "nvim",
+      "name": "Neovim",
+      "command": ["nvim"],
+      "kind": "tui"
+    }
+  ]
+}

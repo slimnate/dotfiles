@@ -123,4 +123,18 @@ if [ ! -f $CONFIG_DIR/microsoft-edge/Default/HubApps ]; then
   run cp -r $DOTFILES_DIR/microsoft-edge/Default/HubApps $CONFIG_DIR/microsoft-edge/Default/HubApps
 fi
 
+# Clone missing third-party plugins (slim.* are stowed above).
+# Pass -n/-v through so dry-run lists the clones instead of skipping this step.
+PLUGIN_FLAGS=""
+[ "$VERBOSE" -eq 1 ] && PLUGIN_FLAGS="$PLUGIN_FLAGS -v"
+[ "$DRY_RUN" -eq 1 ] && PLUGIN_FLAGS="$PLUGIN_FLAGS -n"
+echo "Installing third-party plugins..."
+"$DOTFILES_DIR/install-plugins.sh" $PLUGIN_FLAGS
+plugin_rc=$?
+
+if [ "$plugin_rc" -ne 0 ]; then
+  echo "Dotfiles restored, but plugin install failed" >&2
+  exit "$plugin_rc"
+fi
+
 echo "Dotfiles restored successfully"
