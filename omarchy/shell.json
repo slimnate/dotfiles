@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "idle": {
+    "screensaver": 150,
+    "lock": 151
+  },
+  "bar": {
+    "position": "top",
+    "transparent": false,
+    "centerAnchor": "omarchy.active-window",
+    "layout": {
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "slim.workspaces"
+        },
+        {
+          "id": "bitr0t.spotify-menu-chip"
+        },
+        {
+          "id": "dev.git"
+        },
+        {
+          "id": "slim.projects"
+        },
+        {
+          "id": "io.github.juancasanueva.developer-control-center"
+        },
+        {
+          "id": "io.github.alexdont.color-studio"
+        }
+      ],
+      "center": [
+        {
+          "id": "omarchy.indicators"
+        },
+        {
+          "id": "omarchy.active-window"
+        },
+        {
+          "id": "omarchy.clock",
+          "format": "dddd HH:mm",
+          "formatAlt": "d MMMM 'W'ww yyyy",
+          "verticalFormat": "HH\n—\nmm"
+        },
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "mryll.meteobar"
+        },
+        {
+          "id": "com.github.djkawada.razer-control"
+        },
+        {
+          "id": "io.github.ilkaydnc.omargb",
+          "off": {}
+        },
+        {
+          "id": "kairos.day-in-history"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
+      ],
+      "right": [
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "io.github.twoscott.mouse-battery"
+        },
+        {
+          "id": "omamail"
+        },
+        {
+          "id": "crmne.ultimate-guitar"
+        },
+        {
+          "id": "io.github.chris.snitch"
+        },
+        {
+          "id": "io.github.randazraik.xray"
+        },
+        {
+          "id": "omarchy.tailscale"
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "bitr0t.system-monitor"
+        },
+        {
+          "id": "slim.disk"
+        },
+        {
+          "id": "omaplug"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power"
+        }
+      ]
+    }
+  },
+  "plugins": [
+    {
+      "id": "io.github.iainfreestone.toolroll"
+    },
+    {
+      "id": "slim.projects"
+    }
+  ],
+  "disabledPlugins": [
+    "omarchy.media"
+  ],
+  "cloneSourceRestores": [
+    "bitr0t.spotify-menu-chip"
+  ]
+}

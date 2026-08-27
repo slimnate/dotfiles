@@ -103,7 +103,6 @@ restore_home_file() {
 restore_dir "alacritty"
 restore_dir "bash"
 restore_dir "hypr"
-restore_dir "waybar"
 restore_dir "omarchy"
 restore_dir "systemd"
 

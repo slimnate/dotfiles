@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "slim.memory",
+  "name": "Memory",
+  "version": "1.0.0",
+  "author": "slim",
+  "description": "Memory usage pill with detail panel",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Memory",
+    "description": "RAM and swap usage details",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

@@ -1,9 +1,9 @@
 # Customized Omarchy Dotfiles
 
-This repository contains dotfiles for a customized Omarchy installation. It is intended to be used with [GNU Stow](https://www.gnu.org/software/stow/) to symlink configuration files into place under `~/.config` and your home directory.
+This repository contains dotfiles for a customized [Omarchy](https://omarchy.org/) installation (Quattro / Omarchy 4). It is intended to be used with [GNU Stow](https://www.gnu.org/software/stow/) to symlink configuration files into place under `~/.config` and your home directory.
 
 ### Requirements
-- [Omarchy](https://omarchy.org/) installed and configured on your system
+- Omarchy 4 (Quattro) installed and configured
 - GNU Stow (`stow`)
 - [`yay`](https://github.com/Jguer/yay) (AUR helper) for optional AUR packages in `install-deps.sh`
 
@@ -43,11 +43,12 @@ chmod +x ./stow-restore.sh
 ```
 
 #### What it does:
-- Backs up existing configs that will be overwritten to `~/.config_backups/` (timestamped). Backups are stored relative to `~/`
+- Backs up existing configs that will be overwritten to `~/.config_backups/` (timestamped)
 - Unstows previous links for these targets
-- Stows packages into place: `alacritty`, `bash`, `hypr`, `waybar`, `starship`, `omarchy`, `systemd`, and `bashrc` → `~/.bashrc`
-- Syncs `omarchy/themes` into `~/.config/omarchy` and runs `omarchy-theme-set synthwave84`
+- Stows packages: `alacritty`, `bash`, `hypr`, `starship`, `omarchy`, `systemd`, and `bashrc` → `~/.bashrc`
+- Syncs `omarchy/themes` into `~/.config/omarchy` and runs `omarchy theme set synthwave84`
 - Seeds Microsoft Edge `HubApps` if missing (see below)
+- Clones missing third-party plugins from `plugin-sources.json` via `install-plugins.sh` (forwards `-n` / `-v`)
 
 To restore the most recent backup instead of stowing:
 
@@ -58,7 +59,6 @@ To restore the most recent backup instead of stowing:
 This delegates to `restore-backup.sh`.
 
 #### CLI Options
-The following options can be used when running `stow-restore.sh`:
 
 | flag | Description |
 |------|-------------|
@@ -67,14 +67,34 @@ The following options can be used when running `stow-restore.sh`:
 | -n   | Dry run. Does not modify any files, just prints a list of commands to be executed. This still runs `stow` with `-n` so you can see all changes stow would make. |
 | -r   | Restore the most recent backup via `restore-backup.sh` and exit. |
 
+### Install third-party plugins
+Custom `slim.*` plugins are vendored under `omarchy/plugins/` and stowed with the rest of the config. Third-party plugins are git clones; their URLs live in `plugin-sources.json`. Enablement and bar placement stay in `omarchy/shell.json` (`install-plugins.sh` does not pass `--enable`).
+
+`stow-restore.sh` runs `install-plugins.sh` at the end (already-installed ids are skipped). You can still run it on its own:
+
+```bash
+chmod +x ./install-plugins.sh
+./install-plugins.sh
+```
+
+To refresh the lockfile from plugins currently installed on this machine:
+
+```bash
+chmod +x ./dump-plugins.sh
+./dump-plugins.sh
+```
+
+`dump-plugins.sh -n` prints the JSON without writing. Day-to-day updates of already-cloned plugins remain `omarchy plugin update`.
+
 ## Overview of customizations
 
 ### Alacritty
-Stowed terminal config with Omarchy theme import, CaskaydiaMono Nerd Font at size 9, window padding, undecorated window, and keybindings for F11 fullscreen plus Shift/Ctrl+Insert paste/copy.
+Stowed terminal config with Quattro theme import from `~/.local/state/omarchy/current/theme/alacritty.toml`, CaskaydiaMono Nerd Font at size 9, window padding, undecorated window, F11 fullscreen, Shift/Ctrl+Insert paste/copy, and CSI-u Shift+Return / Alt+Shift+Return bindings for tmux and TUIs.
 
 ### Bash
 Customizations to `.bashrc` (stowed from `bashrc/.bashrc`):
 
+- Sets `OMARCHY_PATH` to `/usr/share/omarchy` (Quattro package path)
 - Prepends `~/.local/bin` to `PATH`
 - Sources `~/.local/bin/env` when present
 - Sources the SSH agent helper
@@ -94,108 +114,74 @@ echo "$SSH_AUTH_SOCK"
 ssh-add -l
 ```
 
-### Hypr
-- `hypr/autostart.conf` - Workspace window rules and autostart: Cursor, Edge, lazygit, Joplin, and Spotify
-- `hypr/bindings.conf` - Custom keybinding overrides (see [Keybindings](#keybindings) below)
-- `hypr/envs.conf` - Extra env file (no active `env =` lines); NVIDIA envs are set in `hyprland.conf`, and `GDK_SCALE` is in `monitors.conf`
-- `hypr/hypridle.conf` - Shared hypridle config; sources the active idle profile
-- `hypr/hypridle.profile.conf` - Switches between laptop/desktop hypridle overrides
-- `hypr/hypridle.laptop.conf` / `hypr/hypridle.desktop.conf` - Host-specific idle overrides
-- `hypr/hyprland.conf` - Base hyprland conf; sources Omarchy defaults plus the files in this directory; also sets NVIDIA env vars
-- `hypr/hyprlock.conf` - Lock screen config
-- `hypr/hyprsunset.conf` - Omarchy default - disables hyprsunset
-- `hypr/input.conf` - Shared input config (mouse accel, touchpad, etc.); sources the active input profile
-- `hypr/input.profile.conf` - Switches between laptop/desktop input overrides
-- `hypr/input.laptop.conf` / `hypr/input.desktop.conf` - Host-specific input overrides
-- `hypr/looknfeel.conf` - Look and feel config
-- `hypr/monitors.conf` - Monitor config (includes `GDK_SCALE`)
-- `hypr/windows.conf` - Window opacity rules (global translucency; full opacity for Edge, Spotify, and Joplin)
-- `hypr/scripts/cursor-dev-launcher` - Project picker for Cursor (see [Project Launcher](#project-launcher))
+### Hyprland (Lua)
+Omarchy Quattro loads Hyprland via Lua. Custom files under `hypr/`:
 
-#### Laptop / desktop profiles
-Shared Hyprland and hypridle settings live in `input.conf` and `hypridle.conf`. Host-specific tweaks are kept in small profile files so the same repo works on both machines.
+| File | Role |
+|------|------|
+| `hyprland.lua` | Entry require list (includes `hypr.windows` and `hypr.machine`) |
+| `monitors.lua` | Display modes, positions, `GDK_SCALE` |
+| `input.lua` | Shared input (accel, touchpad, Razer Basilisk curve) |
+| `machine.lua` | Laptop vs desktop pointer sensitivity via `omarchy-hw-laptop` |
+| `bindings.lua` | Personal keybinding overrides |
+| `looknfeel.lua` | Look and feel |
+| `windows.lua` | Workspace placement, opacity opt-outs, persistent workspaces |
+| `autostart.lua` | `exec-once` apps |
+| `hyprsunset.conf` | Still hyprlang (read by hyprsunset) |
+| `xdph.conf` | XDG desktop portal Hyprland |
 
-**How it works**
-1. `input.conf` sources `~/.config/hypr/input.profile.conf`
-2. `hypridle.conf` sources `~/.config/hypr/hypridle.profile.conf`
-3. Each `*.profile.conf` sources exactly one of `*.laptop.conf` or `*.desktop.conf`
+Idle timing and lock live in `omarchy/shell.json` (`idle.screensaver` / `idle.lock`), not hypridle/hyprlock.
 
-**How to switch**
-Edit both profile switchers and leave only one `source` line active in each:
-
-```conf
-# hypr/input.profile.conf
-source = ~/.config/hypr/input.laptop.conf
-# source = ~/.config/hypr/input.desktop.conf
-```
-
-```conf
-# hypr/hypridle.profile.conf
-source = ~/.config/hypr/hypridle.laptop.conf
-# source = ~/.config/hypr/hypridle.desktop.conf
-```
-
-Then reload:
-
-```bash
-hyprctl reload
-# restart hypridle if idle settings should apply immediately
-systemctl --user restart hypridle.service
-```
-
-Keep laptop/desktop selection in sync across both profile files.
-
-**Differences**
-
-| Setting | Laptop | Desktop |
-|---------|--------|---------|
-| Pointer `sensitivity` (`input.*.conf`) | `0.05` (slightly faster trackpad/pointer feel) | `-0.5` (slower / less twitchy for desk mouse) |
-| `inhibit_sleep` (`hypridle.*.conf`) | `1` (normal idle inhibit) | `3` (wait until the screen is locked before sleep) |
-
-Shared input settings that apply on both hosts (accel profile, touchpad scroll factor, Razer Basilisk device curve, etc.) stay in `input.conf`. Put new machine-specific overrides in the matching `*.laptop.conf` / `*.desktop.conf` files instead of forking the shared configs.
+#### Machine detection
+`machine.lua` uses `o.shell_succeeds("omarchy-hw-laptop")` so the same repo works on laptop and desktop without editing profile switchers. Pointer sensitivity is `0.05` on laptop and `-0.5` on desktop.
 
 #### Keybindings
-Custom overrides only (Omarchy defaults still apply unless unbound/replaced in `bindings.conf`):
+Custom overrides only (Omarchy defaults still apply unless unbound/replaced in `bindings.lua`):
 
-| Keybinding | Action | Description |
-|------------|--------|-------------|
-| **System** |
-| `SUPER + R` | Reload Hyprland | Reloads Hyprland configuration |
-| **Code Editor (Cursor)** |
-| `SUPER + SHIFT + C` | Code Editor (Cursor) | Launches Cursor code editor |
-| `SUPER + SHIFT + ALT + SPACE` | Projects (Cursor) | Launches Cursor dev launcher script |
-| **AI Services** |
-| `SUPER + SHIFT + A` | Grok | Opens Grok webapp (https://grok.com) |
-| `SUPER + SHIFT + ALT + A` | ChatGPT | Opens ChatGPT webapp (https://chatgpt.com) |
-| **Git Tools** |
-| `SUPER + SHIFT + L` | Lazygit | Opens Lazygit terminal UI in terminal |
-| `SUPER + SHIFT + G` | GitHub | Opens GitHub webapp (https://github.com/) |
-| **Workspace Notifications** |
-| `SUPER + 1` | Workspace Notification | Shows "CODE" notification when switching to workspace 1 |
-| `SUPER + 2` | Workspace Notification | Shows "BROWSER" notification when switching to workspace 2 |
-| `SUPER + 3` | Workspace Notification | Shows "LAZYGIT" notification when switching to workspace 3 |
-| `SUPER + 8` | Workspace Notification | Shows "NOTES" notification when switching to workspace 8 |
-| `SUPER + 9` | Workspace Notification | Shows "SPOTIFY" notification when switching to workspace 9 |
-| **Monitor Management** |
-| `SUPER + SHIFT + ALT + LEFT` | Move Workspace Left | Moves current workspace to monitor 0 (left monitor) |
-| `SUPER + SHIFT + ALT + RIGHT` | Move Workspace Right | Moves current workspace to monitor 1 (right monitor) |
-| **Fun** |
-| `SUPER + SHIFT + I` | Asciiquarium | Opens fullscreen asciiquarium in Alacritty |
+| Keybinding | Action |
+|------------|--------|
+| `SUPER + SHIFT + C` | Cursor |
+| `SUPER + SHIFT + ALT + SPACE` | Project launcher |
+| `SUPER + SHIFT + A` | Grok |
+| `SUPER + SHIFT + ALT + A` | ChatGPT |
+| `SUPER + SHIFT + L` | Lazygit |
+| `SUPER + SHIFT + G` | GitHub |
+| `SUPER + 1` / `2` / `3` / `8` / `9` | Workspace switch + label toast |
+| `SUPER + SHIFT + I` | Asciiquarium |
+
+### Shell / bar
+Bar layout, idle, and widgets are configured in `omarchy/shell.json` (Quickshell / `omarchy-shell`):
+
+- Left: menu, `slim.workspaces` (persistent 1–9 with icons), media, `slim.projects`
+- Center: indicators, active window, clock, keyboard layout, system update
+- Right: tray, tailscale, agents, bluetooth, network, audio, `slim.cpu` / `slim.memory` / `slim.disk`, monitor, power
+
+Custom plugins live under `omarchy/plugins/` (`slim.workspaces`, `slim.cpu`, `slim.memory`, `slim.disk`, `slim.projects`). Stats use `omarchy/bar/scripts/system-stats`. Third-party plugin git URLs are listed in `plugin-sources.json` (see [Install third-party plugins](#install-third-party-plugins)).
 
 ### Starship
 Live prompt config is `starship/starship.toml` (stowed to `~/.config/starship.toml`). Extra theme samples live under `starship/themes/` and are kept in the repo only (`stow` ignores that directory). To try one, copy its contents into `starship.toml`.
 
-### Waybar
-Custom bar layout and styling: workspace icons, MPRIS now-playing, Omarchy modules (menu/update/screenrecording), and CSS that imports the active Omarchy theme (`../omarchy/current/theme/waybar.css`).
-
 ### Omarchy themes
-Custom themes under `omarchy/themes/` (`pulsar`, `synthwave84`). `stow-restore.sh` syncs them into `~/.config/omarchy` and applies `synthwave84`.
+Custom Quattro theme under `omarchy/themes/synthwave84` (`colors.toml` + `backgrounds/`). `stow-restore.sh` syncs themes into `~/.config/omarchy` and applies with:
+
+```bash
+omarchy theme set synthwave84
+```
 
 ### systemd
 User units in `systemd/user/`:
-- `omarchy-bg-next.service` / `omarchy-bg-next.timer` — rotate Omarchy backgrounds
 
-These are stowed with the rest of the config. The enable/start steps in `stow-restore.sh` are currently commented out; enable manually if you want the timer.
+- `omarchy-bg-next.service` / `omarchy-bg-next.timer` — rotate Omarchy backgrounds every 5 minutes (`PATH` includes `/usr/share/omarchy/bin`)
+
+These are stowed with the rest of the config. `stow-restore.sh` reloads the user
+daemon, enables the timer, and runs one cycle so the next rotation is scheduled.
+
+Check status:
+
+```bash
+systemctl --user list-timers omarchy-bg-next.timer
+journalctl --user -u omarchy-bg-next.service -e
+```
 
 ### Microsoft Edge `HubApps` to enable sidebar/copilot mode
 If the `~/.config/microsoft-edge/Default/HubApps` file does not exist, the `stow-restore.sh` script will seed one to enable sidebar and Copilot mode support. **This will require a restart of Edge.**
@@ -208,17 +194,22 @@ See the following resources for more info:
 [https://dev.to/0xtanzim/how-to-fix-the-copilot-sidebar-in-microsoft-edge-on-linux-efd](https://dev.to/0xtanzim/how-to-fix-the-copilot-sidebar-in-microsoft-edge-on-linux-efd)
 
 ### Project Launcher
-`hypr/scripts/cursor-dev-launcher` opens a simple picker (via `walker`) to select a project and launch it in Cursor (via `uwsm-app`). Bound to `SUPER+SHIFT+ALT+Space`
+`omarchy/plugins/slim.projects` is an Omarchy overlay plugin (Quickshell) that searches project directories and opens them in a configured editor. Bound to `SUPER+SHIFT+ALT+Space`. A folder icon on the left of the bar opens a panel to edit scan folders and pinned projects (right-click opens the picker).
 
-Configure search roots inside the script:
+Configure search roots, pinned projects, and editors in `omarchy/projects.json` (stowed to `~/.config/omarchy/projects.json`), or use the bar panel for folders and pinned projects:
 
-```bash
-BASE_DIRS=(
-  "$HOME/Documents/dev"
-)
-PROJECTS=(
-  "Custom Dotfiles|$HOME/.dotfiles"
-  "Omarchy Config|$HOME/.local/share/omarchy"
-  "OpenClaw Config|$HOME/.openclaw"
-)
+```json
+{
+  "defaultEditor": "cursor",
+  "baseDirs": ["~/Documents/dev"],
+  "projects": [
+    { "label": "Custom Dotfiles", "path": "~/.dotfiles" },
+    { "label": "Omarchy Config", "path": "/usr/share/omarchy" },
+    { "label": "OpenClaw Config", "path": "~/.openclaw" }
+  ],
+  "editors": [
+    { "id": "cursor", "name": "Cursor", "command": ["/usr/bin/cursor", "-n", "--classic"], "class": "cursor", "kind": "gui" },
+    { "id": "nvim", "name": "Neovim", "command": ["nvim"], "kind": "tui" }
+  ]
+}
 ```

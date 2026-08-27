@@ -1,5 +1,13 @@
-# Synthwave '84 theme for Omarchy
+# Synthwave '84 for Omarchy Quattro
 
-Install using `omarchy-theme-install https://github.com/omacom-io/omarchy-synthwave84-theme.git`.
+Local theme package: `colors.toml` + `backgrounds/`. Omarchy generates
+Alacritty, btop, Hyprland, shell, and other app configs from the palette.
 
-<img width="3840" height="2160" alt="image" src="https://github.com/user-attachments/assets/6be31d95-57ab-4228-9cfc-a147a3cdfaf6" />
+```bash
+# After syncing into ~/.config/omarchy/themes/synthwave84
+omarchy theme set synthwave84
+```
+
+Previously installed via `omarchy-theme-install` from
+https://github.com/omacom-io/omarchy-synthwave84-theme — that clone's
+generated per-app files are obsolete under Quattro.
