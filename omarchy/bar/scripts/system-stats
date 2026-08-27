@@ -1,0 +1,252 @@
+#!/usr/bin/env python3
+"""Emit JSON system stats for slim.cpu / slim.memory / slim.disk panels.
+
+Usage:
+  system-stats cpu
+  system-stats memory
+  system-stats disk
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import subprocess
+import sys
+import time
+
+
+def read_cpu_times() -> tuple[int, int]:
+    with open('/proc/stat', encoding='utf-8') as f:
+        parts = f.readline().split()
+    # user nice system idle iowait irq softirq steal
+    nums = [int(x) for x in parts[1:8]]
+    idle = nums[3] + nums[4]
+    total = sum(nums)
+    return idle, total
+
+
+def cpu_usage_percent(sample_s: float = 0.25) -> int:
+    idle1, total1 = read_cpu_times()
+    time.sleep(sample_s)
+    idle2, total2 = read_cpu_times()
+    didle = idle2 - idle1
+    dtotal = total2 - total1
+    if dtotal <= 0:
+        return 0
+    return max(0, min(100, int(round(100.0 * (1.0 - didle / dtotal)))))
+
+
+def cpu_model() -> str:
+    try:
+        with open('/proc/cpuinfo', encoding='utf-8') as f:
+            for line in f:
+                if line.startswith('model name') or line.startswith('Hardware'):
+                    return line.split(':', 1)[1].strip()
+    except OSError:
+        pass
+    return 'CPU'
+
+
+def cpu_freq_mhz() -> int | None:
+    path = '/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq'
+    try:
+        with open(path, encoding='utf-8') as f:
+            return int(int(f.read().strip()) / 1000)
+    except (OSError, ValueError):
+        return None
+
+
+def cpu_core_count() -> int:
+    return os.cpu_count() or 0
+
+
+def format_uptime(seconds: float) -> str:
+    secs = int(seconds)
+    days, rem = divmod(secs, 86400)
+    hours, rem = divmod(rem, 3600)
+    minutes, _ = divmod(rem, 60)
+    if days:
+        return f'{days}d {hours}h {minutes}m'
+    if hours:
+        return f'{hours}h {minutes}m'
+    return f'{minutes}m'
+
+
+def collect_cpu() -> dict:
+    usage = cpu_usage_percent()
+    load1, load5, load15 = os.getloadavg()
+    with open('/proc/uptime', encoding='utf-8') as f:
+        uptime_s = float(f.read().split()[0])
+    freq = cpu_freq_mhz()
+    cores = cpu_core_count()
+    model = cpu_model()
+    return {
+        'usage': usage,
+        'label': f'\uf4bc {usage}%',
+        'tooltip': f'CPU usage: {usage}%',
+        'model': model,
+        'cores': cores,
+        'freqMhz': freq,
+        'load1': round(load1, 2),
+        'load5': round(load5, 2),
+        'load15': round(load15, 2),
+        'uptime': format_uptime(uptime_s),
+        'uptimeSeconds': int(uptime_s),
+    }
+
+
+def meminfo_kb() -> dict[str, int]:
+    out: dict[str, int] = {}
+    with open('/proc/meminfo', encoding='utf-8') as f:
+        for line in f:
+            key, rest = line.split(':', 1)
+            out[key] = int(rest.split()[0])
+    return out
+
+
+def kb_to_gb(kb: int) -> float:
+    return round(kb / (1024 * 1024), 1)
+
+
+def collect_memory() -> dict:
+    info = meminfo_kb()
+    total = info.get('MemTotal', 0)
+    available = info.get('MemAvailable', 0)
+    free = info.get('MemFree', 0)
+    cached = info.get('Cached', 0)
+    buffers = info.get('Buffers', 0)
+    used = max(0, total - available)
+    percent = int(round(100.0 * used / total)) if total else 0
+    swap_total = info.get('SwapTotal', 0)
+    swap_free = info.get('SwapFree', 0)
+    swap_used = max(0, swap_total - swap_free)
+    used_gb = int(round(used / (1024 * 1024)))
+    total_gb = int(round(total / (1024 * 1024)))
+    return {
+        'percent': percent,
+        'usedGb': used_gb,
+        'totalGb': total_gb,
+        'availableGb': kb_to_gb(available),
+        'freeGb': kb_to_gb(free),
+        'cachedGb': kb_to_gb(cached),
+        'buffersGb': kb_to_gb(buffers),
+        'swapUsedGb': kb_to_gb(swap_used),
+        'swapTotalGb': kb_to_gb(swap_total),
+        'swapPercent': int(round(100.0 * swap_used / swap_total)) if swap_total else 0,
+        'label': f'\uefc5  {used_gb}/{total_gb}GB',
+        'tooltip': f'RAM used: {used_gb}G / {total_gb}G',
+    }
+
+
+def collect_disk() -> dict:
+    raw = subprocess.check_output(
+        [
+            'df',
+            '-B1',
+            '-x',
+            'tmpfs',
+            '-x',
+            'devtmpfs',
+            '-x',
+            'squashfs',
+            '-x',
+            'efivarfs',
+            '--output=source,target,size,used,avail,pcent',
+        ],
+        text=True,
+    )
+    mounts = []
+    seen_sources = set()
+    prefer = ('/', '/boot', '/home')
+    for line in raw.strip().splitlines()[1:]:
+        parts = line.split()
+        if len(parts) < 6:
+            continue
+        source, target, size, used, avail, pcent = parts[:6]
+        # One row per block device; prefer the path listed in `prefer`.
+        if source in seen_sources:
+            continue
+        if target not in prefer and not target.startswith('/mnt') and not target.startswith('/media'):
+            # Keep only preferred system mounts and removable media.
+            if target.count('/') > 1:
+                continue
+        seen_sources.add(source)
+        pct = int(pcent.rstrip('%') or '0')
+        mounts.append(
+            {
+                'source': source,
+                'path': target,
+                'sizeBytes': int(size),
+                'usedBytes': int(used),
+                'availBytes': int(avail),
+                'percent': pct,
+                'sizeHuman': human_bytes(int(size)),
+                'usedHuman': human_bytes(int(used)),
+                'availHuman': human_bytes(int(avail)),
+            }
+        )
+
+    # Prefer canonical order; keep extras after.
+    ordered = []
+    for path in prefer:
+        for m in mounts:
+            if m['path'] == path:
+                ordered.append(m)
+    for m in mounts:
+        if m not in ordered:
+            ordered.append(m)
+
+    root = next((m for m in ordered if m['path'] == '/'), ordered[0] if ordered else None)
+    if not root:
+        return {
+            'percent': 0,
+            'label': '\uf0a0 —',
+            'tooltip': 'No disk data',
+            'mounts': [],
+        }
+
+    return {
+        'percent': root['percent'],
+        'usedHuman': root['usedHuman'],
+        'totalHuman': root['sizeHuman'],
+        'availHuman': root['availHuman'],
+        'path': root['path'],
+        'source': root['source'],
+        'label': f'\uf0c7 {root["percent"]}%',
+        'tooltip': f'{root["usedHuman"]} / {root["sizeHuman"]} used',
+        'mounts': ordered,
+    }
+
+
+def human_bytes(n: int) -> str:
+    units = ['B', 'K', 'M', 'G', 'T', 'P']
+    value = float(n)
+    for unit in units:
+        if value < 1024 or unit == units[-1]:
+            if unit == 'B':
+                return f'{int(value)}{unit}'
+            if value >= 100:
+                return f'{int(round(value))}{unit}'
+            return f'{value:.1f}'.rstrip('0').rstrip('.') + unit
+        value /= 1024
+    return f'{n}B'
+
+
+def main() -> int:
+    if len(sys.argv) < 2 or sys.argv[1] not in ('cpu', 'memory', 'disk'):
+        print('usage: system-stats <cpu|memory|disk>', file=sys.stderr)
+        return 2
+    kind = sys.argv[1]
+    if kind == 'cpu':
+        payload = collect_cpu()
+    elif kind == 'memory':
+        payload = collect_memory()
+    else:
+        payload = collect_disk()
+    print(json.dumps(payload, separators=(',', ':')))
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

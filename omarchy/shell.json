@@ -7,33 +7,76 @@
   "bar": {
     "position": "top",
     "transparent": false,
-    "centerAnchor": "omarchy.clock",
+    "centerAnchor": "omarchy.active-window",
     "layout": {
       "left": [
-        { "id": "omarchy.menu" },
-        { "id": "omarchy.workspaces" }
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "slim.workspaces"
+        },
+        {
+          "id": "omarchy.media"
+        }
       ],
       "center": [
-        { "id": "omarchy.indicators" },
+        {
+          "id": "omarchy.indicators"
+        },
+        {
+          "id": "omarchy.active-window"
+        },
         {
           "id": "omarchy.clock",
           "format": "dddd HH:mm",
           "formatAlt": "d MMMM 'W'ww yyyy",
           "verticalFormat": "HH\n—\nmm"
         },
-        { "id": "omarchy.keyboard-layout" },
-        { "id": "omarchy.weather" },
-        { "id": "omarchy.system-update" }
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "id": "omarchy.system-update"
+        }
       ],
       "right": [
-        { "id": "omarchy.tray" },
-        { "id": "omarchy.tailscale" },
-        { "id": "omarchy.agents" },
-        { "id": "omarchy.bluetooth" },
-        { "id": "omarchy.network" },
-        { "id": "omarchy.audio" },
-        { "id": "omarchy.monitor" },
-        { "id": "omarchy.power" }
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "omarchy.tailscale"
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "slim.cpu"
+        },
+        {
+          "id": "slim.memory"
+        },
+        {
+          "id": "slim.disk"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power"
+        }
       ]
     }
   },

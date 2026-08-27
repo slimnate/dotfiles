@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "slim.disk",
+  "name": "Disk",
+  "version": "1.0.0",
+  "author": "slim",
+  "description": "Disk usage pill with mount detail panel",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Disk",
+    "description": "Filesystem usage by mount",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

@@ -2,6 +2,11 @@
 -- Ported from windows.conf and the windowrule block in autostart.conf.
 -- See https://wiki.hypr.land/Configuring/Basics/Window-Rules/
 
+-- Persistent workspaces 1-9 (matches old waybar persistent-workspaces).
+for i = 1, 9 do
+  hl.workspace_rule({ workspace = tostring(i), persistent = true })
+end
+
 -- Workspace / monitor placement (silent = don't steal focus on open).
 o.window("cursor", { workspace = "1 silent", monitor = "DP-1" })
 o.window("microsoft-edge", { workspace = "2 silent", monitor = "DP-2" })
