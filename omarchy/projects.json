@@ -8,30 +8,40 @@
   ],
   "projects": [
     {
-      "label": "Custom Dotfiles",
-      "path": "~/.dotfiles"
+      "path": "~/.dotfiles",
+      "label": "Custom Dotfiles"
     },
     {
-      "label": "Omarchy Config",
-      "path": "/usr/share/omarchy"
+      "path": "/usr/share/omarchy",
+      "label": "Omarchy Config"
     },
     {
-      "label": "OpenClaw Config",
-      "path": "~/.openclaw"
+      "path": "~/.openclaw",
+      "label": "OpenClaw Config"
+    },
+    {
+      "path": "~/.config",
+      "label": "~/.config"
     }
   ],
   "editors": [
     {
       "id": "cursor",
       "name": "Cursor",
-      "command": ["/usr/bin/cursor", "-n", "--classic"],
+      "command": [
+        "/usr/bin/cursor",
+        "-n",
+        "--classic"
+      ],
       "class": "cursor",
       "kind": "gui"
     },
     {
       "id": "nvim",
       "name": "Neovim",
-      "command": ["nvim"],
+      "command": [
+        "nvim"
+      ],
       "kind": "tui"
     }
   ]

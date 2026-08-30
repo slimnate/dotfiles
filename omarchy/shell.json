@@ -123,6 +123,9 @@
     },
     {
       "id": "slim.projects"
+    },
+    {
+      "id": "io.github.krishang-zinzuwadia.omarchy-clipboard"
     }
   ],
   "disabledPlugins": [

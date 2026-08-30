@@ -53,3 +53,7 @@ o.bind("SUPER + SHIFT + I", "Asciiquarium", "alacritty --title asciiquarium -e a
 
 -- Toolroll
 o.bind("SUPER + SHIFT + T", "Toolroll", "omarchy-shell shell toggle io.github.iainfreestone.toolroll")
+
+-- Snitch   
+hl.unbind("SUPER + SHIFT + S")
+o.bind("SUPER + SHIFT + S", "Snitch", "omarchy-shell shell toggle io.github.mvanthoor.snitch")
