@@ -123,6 +123,24 @@ if [ ! -f $CONFIG_DIR/microsoft-edge/Default/HubApps ]; then
   run cp -r $DOTFILES_DIR/microsoft-edge/Default/HubApps $CONFIG_DIR/microsoft-edge/Default/HubApps
 fi
 
+# Keep Edge as the Omarchy/XDG default so SUPER+SHIFT+B, webapps, and xdg-open
+# all follow it. Desktop id is microsoft-edge.desktop.
+if command -v microsoft-edge-stable >/dev/null 2>&1; then
+  log "Setting Microsoft Edge as default browser"
+  run omarchy default browser edge
+  for mime in \
+    x-scheme-handler/chrome \
+    application/x-extension-htm \
+    application/x-extension-html \
+    application/x-extension-shtml \
+    application/xhtml+xml \
+    application/x-extension-xhtml \
+    application/x-extension-xht
+  do
+    run xdg-mime default microsoft-edge.desktop "$mime"
+  done
+fi
+
 # Clone missing third-party plugins (slim.* are stowed above).
 # Pass -n/-v through so dry-run lists the clones instead of skipping this step.
 PLUGIN_FLAGS=""

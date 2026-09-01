@@ -39,11 +39,22 @@ else
     echo "Skipping Asciiquarium..."
 fi
 
-# Install microsoft-edge-stable-bin from AUR and configure as default browser
+# Install microsoft-edge-stable-bin from AUR and set it as the Omarchy/XDG default.
 if prompt_install "Microsoft Edge and set as default browser"; then
     echo "Installing Microsoft Edge..."
     yay -S microsoft-edge-stable-bin
-    xdg-settings set default-web-browser microsoft-edge-stable-bin.desktop
+    omarchy default browser edge
+    for mime in \
+        x-scheme-handler/chrome \
+        application/x-extension-htm \
+        application/x-extension-html \
+        application/x-extension-shtml \
+        application/xhtml+xml \
+        application/x-extension-xhtml \
+        application/x-extension-xht
+    do
+        xdg-mime default microsoft-edge.desktop "$mime"
+    done
 else
     echo "Skipping Microsoft Edge..."
 fi

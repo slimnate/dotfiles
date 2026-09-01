@@ -31,7 +31,7 @@ Optional deps that will be prompted before installing:
 - [Joplin](https://joplinapp.org/) notes (`yay` required to install from AUR)
 - [Starship](https://starship.rs/) terminal prompt
 - [asciiquarium](https://github.com/cmatsuoka/asciiquarium) (terminal screensaver; bound to `SUPER+SHIFT+I`)
-- Microsoft Edge (AUR via `yay`; set as default browser with this script as well)
+- Microsoft Edge (AUR via `yay`; set as the Omarchy/XDG default with `omarchy default browser edge`)
 - [polychromatic](https://aur.archlinux.org/packages/polychromatic) for Razer devices (`yay`)
 
 ### Run stow restore
@@ -48,6 +48,7 @@ chmod +x ./stow-restore.sh
 - Stows packages: `alacritty`, `bash`, `hypr`, `starship`, `omarchy`, `systemd`, and `bashrc` → `~/.bashrc`
 - Syncs `omarchy/themes` into `~/.config/omarchy` and runs `omarchy theme set synthwave84`
 - Seeds Microsoft Edge `HubApps` if missing (see below)
+- Sets Microsoft Edge as the Omarchy/XDG default browser when `microsoft-edge-stable` is installed
 - Clones missing third-party plugins from `plugin-sources.json` via `install-plugins.sh` (forwards `-n` / `-v`)
 
 To restore the most recent backup instead of stowing:
