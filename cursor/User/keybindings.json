@@ -1,0 +1,26 @@
+// Place your key bindings in this file to override the defaults
+//
+// Omarchy Super+C / Super+V inject Ctrl+C / Ctrl+V into non-terminal windows.
+// Cursor's Linux terminal defaults are Ctrl+Shift+C / Ctrl+Shift+V, so remap
+// the injected chords when the integrated terminal is focused.
+[
+    {
+        "key": "ctrl+i",
+        "command": "composerMode.agent"
+    },
+    {
+        "key": "ctrl+alt+s",
+        "command": "workbench.action.toggleUnifiedSidebarFromKeyboard",
+        "when": "!isAuxiliaryWindowFocusedContext"
+    },
+    {
+        "key": "ctrl+c",
+        "command": "workbench.action.terminal.copySelection",
+        "when": "terminalFocus && terminalTextSelected"
+    },
+    {
+        "key": "ctrl+v",
+        "command": "workbench.action.terminal.paste",
+        "when": "terminalFocus"
+    }
+]

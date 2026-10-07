@@ -78,6 +78,7 @@ restore_config_file() {
   local dst="$CONFIG_DIR/$name"
   if [ -e "$src" ]; then
     log "Restoring file $name"
+    run mkdir -p "$(dirname "$dst")"
     run rm -f "$dst"
     run cp -a "$src" "$dst"
   else
@@ -108,6 +109,7 @@ restore_dir "systemd"
 
 # Files captured by stow-restore backups
 restore_config_file "starship.toml"
+restore_config_file "Cursor/User/keybindings.json"
 
 # Home dotfiles captured by stow-restore backups
 restore_home_file ".bashrc"

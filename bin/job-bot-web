@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# Start or stop the job-bot Vite UI on a dedicated port (not Vite's 5173).
+#   job-bot-web        — reuse a running server if present, else start one and open the browser
+#   job-bot-web stop   — kill the server and close its terminal
+# Bound to SUPER+SHIFT+J (start) and SUPER+SHIFT+ALT+J (stop).
+set -euo pipefail
+
+JOB_BOT_DIR="${JOB_BOT_DIR:-$HOME/Documents/dev/job-bot}"
+PORT="${JOB_BOT_WEB_PORT:-17373}"
+URL="${JOB_BOT_URL:-http://127.0.0.1:${PORT}/}"
+APP_ID='org.omarchy.job-bot-web'
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/job-bot-web.lock"
+
+port_listening() {
+  ss -ltnH "sport = :${PORT}" 2>/dev/null | grep -q .
+}
+
+ui_ready() {
+  curl -sf -o /dev/null --connect-timeout 0.3 "$URL"
+}
+
+tui_addresses() {
+  hyprctl clients -j 2>/dev/null | jq -r --arg p "$APP_ID" '
+    .[] | select((.class | test($p; "i")) or (.title | test($p; "i"))) | .address
+  '
+}
+
+close_tui() {
+  local addr
+  while IFS= read -r addr; do
+    [[ -z "$addr" ]] && continue
+    hyprctl dispatch closewindow "address:${addr}" >/dev/null 2>&1 || true
+  done < <(tui_addresses)
+}
+
+kill_port_listeners() {
+  local pids
+  pids="$(ss -ltnp "sport = :${PORT}" 2>/dev/null | grep -oP 'pid=\K[0-9]+' | sort -u | tr '\n' ' ')"
+  if [[ -n "${pids// }" ]]; then
+    # shellcheck disable=SC2086
+    kill $pids >/dev/null 2>&1 || true
+  fi
+  if command -v fuser >/dev/null 2>&1; then
+    fuser -k "${PORT}/tcp" >/dev/null 2>&1 || true
+  fi
+}
+
+wait_until_ready() {
+  local i
+  for i in $(seq 1 120); do
+    if ui_ready; then
+      return 0
+    fi
+    sleep 0.5
+  done
+  return 1
+}
+
+stop_server() {
+  close_tui
+  kill_port_listeners
+  local i
+  for i in $(seq 1 20); do
+    if ! port_listening; then
+      notify-send 'Job Bot' "Stopped web UI on port ${PORT}"
+      return 0
+    fi
+    sleep 0.15
+  done
+  notify-send 'Job Bot' "Could not free port ${PORT}"
+  return 1
+}
+
+start_or_open() {
+  if [[ ! -d "$JOB_BOT_DIR" ]]; then
+    notify-send 'Job Bot' "Project not found: $JOB_BOT_DIR"
+    return 1
+  fi
+
+  mkdir -p "$(dirname "$LOCK_FILE")"
+  exec 9>"$LOCK_FILE"
+  flock 9
+
+  if ui_ready || port_listening; then
+    if port_listening && ! ui_ready; then
+      wait_until_ready || true
+    fi
+    if ui_ready; then
+      omarchy launch browser "$URL"
+      return 0
+    fi
+  fi
+
+  # Stale terminal from a crashed server — close it before starting another.
+  close_tui
+
+  alacritty --class "$APP_ID" --title 'job-bot web' -e bash -lc \
+    "cd $(printf '%q' "$JOB_BOT_DIR") && exec npm run dev:web" &
+
+  if ! wait_until_ready; then
+    notify-send 'Job Bot' "Vite did not become ready at $URL"
+    return 1
+  fi
+
+  omarchy launch browser "$URL"
+}
+
+case "${1:-}" in
+  stop|kill|off)
+    stop_server
+    ;;
+  ''|start|open)
+    start_or_open
+    ;;
+  *)
+    echo "usage: job-bot-web [start|stop]" >&2
+    exit 2
+    ;;
+esac

@@ -57,3 +57,7 @@ o.bind("SUPER + SHIFT + T", "Toolroll", "omarchy-shell shell toggle io.github.ia
 -- Snitch   
 hl.unbind("SUPER + SHIFT + S")
 o.bind("SUPER + SHIFT + S", "Snitch", "omarchy-shell shell toggle io.github.mvanthoor.snitch")
+
+-- Job Bot web UI on :17373 (reuse if already running).
+o.bind("SUPER + SHIFT + J", "Job Bot Web", os.getenv("HOME") .. "/.local/bin/job-bot-web")
+o.bind("SUPER + SHIFT + ALT + J", "Job Bot Web Stop", os.getenv("HOME") .. "/.local/bin/job-bot-web stop")

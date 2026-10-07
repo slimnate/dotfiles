@@ -45,7 +45,7 @@ chmod +x ./stow-restore.sh
 #### What it does:
 - Backs up existing configs that will be overwritten to `~/.config_backups/` (timestamped)
 - Unstows previous links for these targets
-- Stows packages: `alacritty`, `bash`, `hypr`, `starship`, `omarchy`, `systemd`, and `bashrc` → `~/.bashrc`
+- Stows packages: `alacritty`, `bash`, `hypr`, `starship`, `omarchy`, `systemd`, `cursor` → `~/.config/Cursor/User/keybindings.json`, `bashrc` → `~/.bashrc`, and `bin` → `~/.local/bin`
 - Syncs `omarchy/themes` into `~/.config/omarchy` and runs `omarchy theme set synthwave84`
 - Seeds Microsoft Edge `HubApps` if missing (see below)
 - Sets Microsoft Edge as the Omarchy/XDG default browser when `microsoft-edge-stable` is installed
@@ -149,6 +149,10 @@ Custom overrides only (Omarchy defaults still apply unless unbound/replaced in `
 | `SUPER + SHIFT + G` | GitHub |
 | `SUPER + 1` / `2` / `3` / `8` / `9` | Workspace switch + label toast |
 | `SUPER + SHIFT + I` | Asciiquarium |
+| `SUPER + SHIFT + J` | Job Bot web (reuse `:17373` if running, else start + browser) |
+| `SUPER + SHIFT + ALT + J` | Stop Job Bot web server |
+
+`job-bot-web` (stowed to `~/.local/bin`) runs Vite on **17373** (not Vite’s default 5173). A second press reuses the existing server instead of starting another. `job-bot-web stop` kills the listener and closes its terminal. Override the repo with `JOB_BOT_DIR`.
 
 ### Shell / bar
 Bar layout, idle, and widgets are configured in `omarchy/shell.json` (Quickshell / `omarchy-shell`):
@@ -158,6 +162,18 @@ Bar layout, idle, and widgets are configured in `omarchy/shell.json` (Quickshell
 - Right: tray, tailscale, agents, bluetooth, network, audio, `slim.cpu` / `slim.memory` / `slim.disk`, monitor, power
 
 Custom plugins live under `omarchy/plugins/` (`slim.workspaces`, `slim.cpu`, `slim.memory`, `slim.disk`, `slim.projects`). Stats use `omarchy/bar/scripts/system-stats`. Third-party plugin git URLs are listed in `plugin-sources.json` (see [Install third-party plugins](#install-third-party-plugins)).
+
+### Cursor
+Only `cursor/User/keybindings.json` is stowed (to `~/.config/Cursor/User/keybindings.json`). The rest of `~/.config/Cursor` stays local so History, storage, and `settings.json` are not overwritten.
+
+Linux Cursor paste/copy in the integrated terminal is Ctrl+Shift+V / Ctrl+Shift+C. Omarchy Super+V / Super+C inject Ctrl+V / Ctrl+C into non-terminal windows, so these remaps apply when the terminal is focused:
+
+| Keybinding | Action | When |
+|------------|--------|------|
+| `ctrl+v` | Paste | `terminalFocus` |
+| `ctrl+c` | Copy selection | `terminalFocus && terminalTextSelected` |
+
+Without a selection, Super+C / Ctrl+C still interrupts the running command.
 
 ### Starship
 Live prompt config is `starship/starship.toml` (stowed to `~/.config/starship.toml`). Extra theme samples live under `starship/themes/` and are kept in the repo only (`stow` ignores that directory). To try one, copy its contents into `starship.toml`.

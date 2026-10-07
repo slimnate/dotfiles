@@ -66,6 +66,10 @@ run mv $CONFIG_DIR/hypr $BACKUP_DIR/hypr
 run mv $CONFIG_DIR/starship.toml $BACKUP_DIR/starship.toml
 run mv $HOME/.bashrc $BACKUP_DIR/.bashrc
 
+# Cursor: only keybindings.json. Do not move ~/.config/Cursor (app state).
+run mkdir -p $BACKUP_DIR/Cursor/User
+run mv $CONFIG_DIR/Cursor/User/keybindings.json $BACKUP_DIR/Cursor/User/keybindings.json
+
 # Backup the omarchy and systemd directories (copy instead of move)
 run cp -r $CONFIG_DIR/omarchy $BACKUP_DIR/omarchy
 run cp -r $CONFIG_DIR/systemd $BACKUP_DIR/systemd
@@ -76,6 +80,8 @@ run mkdir -p $CONFIG_DIR/bash
 run mkdir -p $CONFIG_DIR/hypr
 run mkdir -p $CONFIG_DIR/omarchy
 run mkdir -p $CONFIG_DIR/systemd
+run mkdir -p $CONFIG_DIR/Cursor/User
+run mkdir -p $HOME/.local/bin
 
 # Undo linking all of the dotfiles before restoring them
 echo "Unlinking old dotfiles..."
@@ -85,7 +91,9 @@ stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/hypr hypr
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR starship
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/omarchy omarchy
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR systemd
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/Cursor cursor
 stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $HOME bashrc
+stow --D $STOW_V $STOW_N -d $DOTFILES_DIR -t $HOME/.local/bin bin
 
 # Restore the configuration files from the dotfiles repository
 echo "Linking new dotfiles..."
@@ -101,8 +109,12 @@ echo "Linking omarchy (shell.json, plugins, bar)"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/omarchy omarchy --ignore='themes/*'
 echo "Linking systemd"
 stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR systemd
+echo "Linking Cursor keybindings"
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $CONFIG_DIR/Cursor cursor
 echo "Linking bashrc"
 stow --dotfiles $STOW_V $STOW_N -d $DOTFILES_DIR -t ~ bashrc
+echo "Linking local bin scripts"
+stow $STOW_V $STOW_N -d $DOTFILES_DIR -t $HOME/.local/bin bin
 
 # Set up theme
 echo "Restoring custom themes..."
